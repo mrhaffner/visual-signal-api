@@ -1,10 +1,10 @@
 import { Schema, model } from 'mongoose';
 
-const columnSchema = new Schema({
+const listSchema = new Schema({
   title: { type: String, required: true },
   index: { type: Number, required: true },
 });
 
-const Column = model('Column', columnSchema);
+const List = model('List', listSchema);
 
-export default Column;
+export default List;

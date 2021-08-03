@@ -1,15 +1,16 @@
 import express from 'express';
 import mongoose from 'mongoose';
-import Column from './column/model';
+import List from './list/model';
+import Card from './card/model';
 
 import { ApolloServer, gql } from 'apollo-server-express';
 
 const typeDefs = gql`
   type Board {
-    columns: [Column]
+    Lists: [List]
   }
 
-  type Column {
+  type List {
     _id: ID!
     title: String!
     index: Int!
@@ -19,41 +20,81 @@ const typeDefs = gql`
   type Card {
     _id: ID!
     content: String!
+    listId: String!
   }
 
   type Query {
-    allColumns: [Column]
+    allLists: [List]
+    getAllCards: [Card]
+    getCardById(_id: ID!): Card
   }
 
-  input ColumnCreateInput {
+  input ListCreateInput {
     title: String!
     index: Int!
   }
 
-  input ColumnUpdateInput {
+  input ListUpdateInput {
     title: String
     index: Int
   }
 
+  input CardCreateInput {
+    content: String!
+    index: Int!
+    listId: String!
+  }
+
   type Mutation {
-    createColumn(input: ColumnCreateInput): Column
-    updateColumn(_id: ID!, input: ColumnUpdateInput): Column
-    deleteColumn(_id: ID!): ID
+    createList(input: ListCreateInput): List
+    updateList(_id: ID!, input: ListUpdateInput): List
+    deleteList(_id: ID!): ID
+    createCard(input: CardCreateInput): Card
   }
 `;
 
+//delete and update card functions
+//get card by id
 const resolvers = {
   Query: {
-    allColumns: async () => {
-      return await Column.find();
+    allLists: async () => {
+      //make this aggregate function that adds the cards
+      const lists = await List.aggregate([
+        // {
+        //   $lookup: {
+        //     from: 'Card',
+        //     let: { listId: '_$id' },
+        //     pipeline: [{ $match: { $expr: { $eq: ['$listId', '$$listId'] } } }],
+        //     as: 'cards',
+        //   },
+        // },
+        {
+          $lookup: {
+            from: 'cards',
+            localField: '_id',
+            foreignField: 'listId',
+            pipeline: [],
+            as: 'cards',
+          },
+        },
+      ]);
+      console.log(lists);
+      return lists;
+      // return await List.find();
+    },
+    getAllCards: async () => {
+      return await Card.find();
+    },
+    getCardById: async (_id: String) => {
+      return await Card.find({ _id });
     },
   },
   Mutation: {
-    createColumn: async (_: any, { input }: any) => {
-      return await Column.create(input);
+    createList: async (_: any, { input }: any) => {
+      return await List.create(input);
     },
-    updateColumn: async (_: any, { _id, input }: any) => {
-      return await Column.findOneAndUpdate(
+    updateList: async (_: any, { _id, input }: any) => {
+      return await List.findOneAndUpdate(
         {
           _id,
         },
@@ -63,11 +104,14 @@ const resolvers = {
         },
       );
     },
-    deleteColumn: async (_: any, { _id }: any) => {
-      await Column.findOneAndRemove({
+    deleteList: async (_: any, { _id }: any) => {
+      await List.findOneAndRemove({
         _id,
       });
       return _id;
+    },
+    createCard: async (_: any, { input }: any) => {
+      return await Card.create(input);
     },
   },
 };

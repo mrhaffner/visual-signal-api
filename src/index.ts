@@ -72,7 +72,11 @@ const resolvers = {
             from: 'cards',
             localField: '_id',
             foreignField: 'listId',
-            pipeline: [],
+            pipeline: [
+              {
+                $sort: { index: 1 },
+              },
+            ],
             as: 'cards',
           },
         },

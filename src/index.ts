@@ -64,6 +64,7 @@ const typeDefs = gql`
 
 const resolvers = {
   Query: {
+    //add sorting!!!!!
     allLists: async () => {
       const lists = await List.aggregate([
         {
@@ -75,7 +76,7 @@ const resolvers = {
             as: 'cards',
           },
         },
-      ]);
+      ]).sort('index');
       return lists;
     },
     //probably don't need this except for testing

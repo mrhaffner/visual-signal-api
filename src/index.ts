@@ -21,6 +21,7 @@ const typeDefs = gql`
     _id: ID!
     content: String!
     listId: String!
+    index: Int!
   }
 
   type Query {
@@ -45,29 +46,26 @@ const typeDefs = gql`
     listId: String!
   }
 
+  input CardUpdateInput {
+    content: String
+    listId: String
+    index: Int
+  }
+
   type Mutation {
     createList(input: ListCreateInput): List
     updateList(_id: ID!, input: ListUpdateInput): List
     deleteList(_id: ID!): ID
     createCard(input: CardCreateInput): Card
+    updateCard(_id: ID!, input: CardUpdateInput): Card
+    deleteCard(_id: ID!): ID
   }
 `;
 
-//delete and update card functions
-//get card by id
 const resolvers = {
   Query: {
     allLists: async () => {
-      //make this aggregate function that adds the cards
       const lists = await List.aggregate([
-        // {
-        //   $lookup: {
-        //     from: 'Card',
-        //     let: { listId: '_$id' },
-        //     pipeline: [{ $match: { $expr: { $eq: ['$listId', '$$listId'] } } }],
-        //     as: 'cards',
-        //   },
-        // },
         {
           $lookup: {
             from: 'cards',
@@ -78,15 +76,15 @@ const resolvers = {
           },
         },
       ]);
-      console.log(lists);
       return lists;
-      // return await List.find();
     },
+    //probably don't need this except for testing
     getAllCards: async () => {
       return await Card.find();
     },
-    getCardById: async (_id: String) => {
-      return await Card.find({ _id });
+    getCardById: async (_: any, { _id }: any) => {
+      const card = await Card.find({ _id });
+      return card[0];
     },
   },
   Mutation: {
@@ -112,6 +110,24 @@ const resolvers = {
     },
     createCard: async (_: any, { input }: any) => {
       return await Card.create(input);
+    },
+    //might want a seperate update function for changing card content vs position (with maybe listId depending on if it changes lists) so content/position can be required fields
+    updateCard: async (_: any, { _id, input }: any) => {
+      return await Card.findOneAndUpdate(
+        {
+          _id,
+        },
+        input,
+        {
+          new: true,
+        },
+      );
+    },
+    deleteCard: async (_: any, { _id }: any) => {
+      await Card.findOneAndRemove({
+        _id,
+      });
+      return _id;
     },
   },
 };

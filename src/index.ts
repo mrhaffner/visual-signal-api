@@ -30,41 +30,18 @@ const typeDefs = gql`
     getCardById(_id: ID!): Card
   }
 
-  input ListCreateInput {
-    title: String!
-    index: Int!
-  }
-
-  input ListUpdateInput {
-    title: String
-    index: Int
-  }
-
-  input CardCreateInput {
-    content: String!
-    index: Int!
-    listId: String!
-  }
-
-  input CardUpdateInput {
-    content: String
-    listId: String
-    index: Int
-  }
-
   type Mutation {
-    createList(input: ListCreateInput): List
-    updateList(_id: ID!, input: ListUpdateInput): List
+    createList(title: String!, index: Int!): List
+    updateList(_id: ID!, title: String, index: Int): List
     deleteList(_id: ID!): ID
-    createCard(input: CardCreateInput): Card
-    updateCard(_id: ID!, input: CardUpdateInput): Card
+    createCard(content: String!, index: Int!, listId: String!): Card
+    updateCard(_id: ID!, content: String, index: Int, listId: String): Card
     deleteCard(_id: ID!): ID
   }
 `;
 
 const resolvers = {
   Query: {
-    //add sorting!!!!!
     allLists: async () => {
       const lists = await List.aggregate([
         {
@@ -93,15 +70,15 @@ const resolvers = {
     },
   },
   Mutation: {
-    createList: async (_: any, { input }: any) => {
-      return await List.create(input);
+    createList: async (_: any, { title, index }: any) => {
+      return await List.create({ title, index });
     },
-    updateList: async (_: any, { _id, input }: any) => {
+    updateList: async (_: any, { _id, title, index }: any) => {
       return await List.findOneAndUpdate(
         {
           _id,
         },
-        input,
+        { title, index },
         {
           new: true,
         },
@@ -113,16 +90,16 @@ const resolvers = {
       });
       return _id;
     },
-    createCard: async (_: any, { input }: any) => {
-      return await Card.create(input);
+    createCard: async (_: any, { content, index, listId }: any) => {
+      return await Card.create({ content, index, listId });
     },
     //might want a seperate update function for changing card content vs position (with maybe listId depending on if it changes lists) so content/position can be required fields
-    updateCard: async (_: any, { _id, input }: any) => {
+    updateCard: async (_: any, { _id, content, index, listId }: any) => {
       return await Card.findOneAndUpdate(
         {
           _id,
         },
-        input,
+        { content, index, listId },
         {
           new: true,
         },

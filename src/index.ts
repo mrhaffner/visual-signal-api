@@ -6,10 +6,6 @@ import Card from './card/model';
 import { ApolloServer, gql } from 'apollo-server-express';
 
 const typeDefs = gql`
-  type Board {
-    Lists: [List]
-  }
-
   type List {
     _id: ID!
     title: String!
@@ -31,12 +27,36 @@ const typeDefs = gql`
   }
 
   type Mutation {
-    createList(title: String!, index: Int!): List
-    updateList(_id: ID!, title: String, index: Int): List
+    createList(input: CreateList!): List
+    updateList(input: UpdateList!): List
     deleteList(_id: ID!): ID
-    createCard(content: String!, index: Int!, listId: String!): Card
-    updateCard(_id: ID!, content: String, index: Int, listId: String): Card
+    createCard(input: CreateCard!): Card
+    updateCard(input: UpdateCard!): Card
     deleteCard(_id: ID!): ID
+  }
+
+  input CreateList {
+    title: String!
+    index: Int!
+  }
+
+  input UpdateList {
+    _id: ID!
+    title: String
+    index: Int
+  }
+
+  input CreateCard {
+    content: String!
+    listId: String!
+    index: Int!
+  }
+
+  input UpdateCard {
+    _id: ID!
+    content: String
+    listId: String
+    index: Int
   }
 `;
 
@@ -70,10 +90,12 @@ const resolvers = {
     },
   },
   Mutation: {
-    createList: async (_: any, { title, index }: any) => {
+    createList: async (_: any, { input }: any) => {
+      const { title, index } = input;
       return await List.create({ title, index });
     },
-    updateList: async (_: any, { _id, title, index }: any) => {
+    updateList: async (_: any, { input }: any) => {
+      const { _id, title, index } = input;
       return await List.findOneAndUpdate(
         {
           _id,
@@ -85,16 +107,23 @@ const resolvers = {
       );
     },
     deleteList: async (_: any, { _id }: any) => {
-      await List.findOneAndRemove({
-        _id,
-      });
-      return _id;
+      try {
+        await List.findOneAndRemove({
+          _id,
+        });
+        return _id;
+      } catch (e) {
+        console.log(e);
+        return null;
+      }
     },
-    createCard: async (_: any, { content, index, listId }: any) => {
+    createCard: async (_: any, { input }: any) => {
+      const { content, index, listId } = input;
       return await Card.create({ content, index, listId });
     },
     //might want a seperate update function for changing card content vs position (with maybe listId depending on if it changes lists) so content/position can be required fields
-    updateCard: async (_: any, { _id, content, index, listId }: any) => {
+    updateCard: async (_: any, { input }: any) => {
+      const { _id, content, index, listId } = input;
       return await Card.findOneAndUpdate(
         {
           _id,

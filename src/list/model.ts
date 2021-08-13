@@ -1,8 +1,9 @@
 import { Schema, model } from 'mongoose';
 
+//perhaps have shared parent Schema for card and list?
 const listSchema = new Schema({
-  title: { type: String, required: true },
-  index: { type: Number, required: true },
+  name: { type: String, required: true },
+  pos: { type: Number, required: true },
 });
 
 const List = model('List', listSchema);

@@ -1,13 +1,10 @@
-import { gql } from 'apollo-server-express';
+// import { gql } from 'apollo-server-express';
 
-export const cardTypeDefs = gql`
-  type Card {
-    id: ID!
-    content: String!
-  }
-`;
+// export const cardTypeDefs = gql`
 
-export const cardResolvers = {
-  Query: {},
-  Mutation: {},
-};
+// `;
+
+// export const cardResolvers = {
+//   Query: {},
+//   Mutation: {},
+// };

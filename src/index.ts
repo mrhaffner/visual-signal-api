@@ -6,18 +6,17 @@ import Card from './card/model';
 import { ApolloServer, gql } from 'apollo-server-express';
 
 const typeDefs = gql`
-
   type List {
     _id: ID!
     name: String!
-    pos: Int!
+    pos: Float!
     cards: [Card]
   }
 
   type Card {
     _id: ID!
     name: String!
-    pos: Int!
+    pos: Float!
     idList: String!
   }
 
@@ -29,35 +28,33 @@ const typeDefs = gql`
 
   type Mutation {
     createList(input: CreateList!): List
-    updateList(input: UpdateList!): List
+    updateListPos(input: UpdateListPosInput!): List
     deleteList(_id: ID!): ID
     createCard(input: CreateCard!): Card
-    updateCard(input: UpdateCard!): Card
+    updateCardPos(input: UpdateCardPosInput!): Card
     deleteCard(_id: ID!): ID
   }
 
   input CreateList {
     name: String!
-    pos: Int!
+    pos: Float!
   }
 
-  input UpdateList {
+  input UpdateListPosInput {
     _id: ID!
-    name: String
-    pos: Int
+    pos: Float!
   }
 
   input CreateCard {
     name: String!
-    pos: Int!
+    pos: Float!
     idList: String!
   }
 
-  input UpdateCard {
+  input UpdateCardPosInput {
     _id: ID!
-    name: String
-    pos: Int
-    idList: String!
+    pos: Float!
+    idList: String
   }
 `;
 
@@ -94,13 +91,13 @@ const resolvers = {
       const { name, pos } = input;
       return await List.create({ name, pos });
     },
-    updateList: async (_: any, { input }: any) => {
-      const { _id, name, pos } = input;
+    updateListPos: async (_: any, { input }: any) => {
+      const { _id, pos } = input;
       return await List.findOneAndUpdate(
         {
           _id,
         },
-        { name, pos },
+        { pos },
         {
           new: true,
         },
@@ -122,13 +119,16 @@ const resolvers = {
       return await Card.create({ name, pos, idList });
     },
     //might want a seperate update function for changing card content vs position (with maybe listId depending on if it changes lists) so content/position can be required fields
-    updateCard: async (_: any, { input }: any) => {
-      const { _id, name, pos, idList } = input;
+    updateCardPos: async (_: any, { input }: any) => {
+      const { _id, pos, idList } = input;
+      const updateObject = { pos };
+      // @ts-ignore comment
+      if (idList) updateObject.idList = idList;
       return await Card.findOneAndUpdate(
         {
           _id,
         },
-        { name, pos, idList },
+        updateObject,
         {
           new: true,
         },

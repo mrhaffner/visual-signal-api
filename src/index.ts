@@ -6,71 +6,15 @@ import { PubSub } from 'graphql-subscriptions';
 import { SubscriptionServer } from 'subscriptions-transport-ws';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import mongoose from 'mongoose';
-import List from './list/model';
-import Card from './card/model';
+import List from './models/list';
+import Card from './models/card';
+import typeDefs from './gql/index';
 
 (async () => {
   const PORT = 8080;
   const pubsub = new PubSub();
   const app = express();
   const httpServer = createServer(app);
-
-  const typeDefs = gql`
-    type List {
-      _id: ID!
-      name: String!
-      pos: Float!
-      cards: [Card]
-    }
-
-    type Card {
-      _id: ID!
-      name: String!
-      pos: Float!
-      idList: String!
-    }
-
-    type Query {
-      allLists: [List]
-      getAllCards: [Card]
-      getCardById(_id: ID!): Card
-    }
-
-    type Mutation {
-      createList(input: CreateList!): List
-      updateListPos(input: UpdateListPosInput!): List
-      deleteList(_id: ID!): ID
-      createCard(input: CreateCard!): Card
-      updateCardPos(input: UpdateCardPosInput!): Card
-      deleteCard(_id: ID!): ID
-    }
-
-    input CreateList {
-      name: String!
-      pos: Float!
-    }
-
-    input UpdateListPosInput {
-      _id: ID!
-      pos: Float!
-    }
-
-    input CreateCard {
-      name: String!
-      pos: Float!
-      idList: String!
-    }
-
-    input UpdateCardPosInput {
-      _id: ID!
-      pos: Float!
-      idList: String
-    }
-
-    type Subscription {
-      newBoard: [List]
-    }
-  `;
 
   const resolvers = {
     Query: {
@@ -131,6 +75,7 @@ import Card from './card/model';
           },
         ]).sort('pos');
         pubsub.publish('BOARD_UPDATED', { newBoard: lists });
+
         return list;
       },
       deleteList: async (_: any, { _id }: any) => {

@@ -1,18 +1,25 @@
 import { gql } from 'apollo-server-express';
 
 const schemaTypes = gql`
-  type Card {
+  type Board {
     _id: ID!
     name: String!
-    pos: Float!
-    idList: String!
+    lists: [List]
   }
 
   type List {
     _id: ID!
     name: String!
     pos: Float!
+    idBoard: String!
     cards: [Card]
+  }
+
+  type Card {
+    _id: ID!
+    name: String!
+    pos: Float!
+    idList: String!
   }
 `;
 

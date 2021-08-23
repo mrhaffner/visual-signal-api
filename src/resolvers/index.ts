@@ -1,11 +1,45 @@
 import { PubSub } from 'graphql-subscriptions';
 import List from '../models/list';
 import Card from '../models/card';
+import Board from '../models/board';
+import mongoose from 'mongoose';
 
+const ObjectId = mongoose.Types.ObjectId;
 const pubsub = new PubSub();
 
 const resolvers = {
   Query: {
+    allBoards: async () => {
+      return await Board.find();
+    },
+    getBoardById: async (_: any, { _id }: any) => {
+      const board = await Board.aggregate([
+        {
+          $match: { _id: ObjectId(_id) },
+        },
+        {
+          $lookup: {
+            from: 'lists',
+            let: { idBoard: '$_id' },
+            pipeline: [
+              { $match: { $expr: { $eq: ['$idBoard', '$$idBoard'] } } },
+              {
+                $lookup: {
+                  from: 'cards',
+                  let: { idList: '$_id' },
+                  pipeline: [
+                    { $match: { $expr: { $eq: ['$idList', '$$idList'] } } },
+                  ],
+                  as: 'cards',
+                },
+              },
+            ],
+            as: 'lists',
+          },
+        },
+      ]);
+      return board[0];
+    },
     allLists: async () => {
       const lists = await List.aggregate([
         {
@@ -33,9 +67,34 @@ const resolvers = {
     },
   },
   Mutation: {
+    createBoard: async (_: any, { input }: any) => {
+      const { name } = input;
+      return await Board.create({ name });
+    },
+    updateBoard: async (_: any, { input }: any) => {
+      const { _id, name } = input;
+      return await Board.findOneAndUpdate(
+        { _id },
+        { name },
+        {
+          new: true,
+        },
+      );
+    },
+    deleteBoard: async (_: any, { _id }: any) => {
+      try {
+        await Board.findOneAndRemove({
+          _id,
+        });
+        return _id;
+      } catch (e) {
+        console.log(e);
+        return null;
+      }
+    },
     createList: async (_: any, { input }: any) => {
-      const { name, pos } = input;
-      return await List.create({ name, pos });
+      const { name, pos, idBoard } = input;
+      return await List.create({ name, pos, idBoard });
     },
     updateListPos: async (_: any, { input }: any) => {
       const { _id, pos } = input;

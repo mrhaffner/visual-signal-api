@@ -24,11 +24,17 @@ const resolvers = {
             pipeline: [
               { $match: { $expr: { $eq: ['$idBoard', '$$idBoard'] } } },
               {
+                $sort: { pos: 1 },
+              },
+              {
                 $lookup: {
                   from: 'cards',
                   let: { idList: '$_id' },
                   pipeline: [
                     { $match: { $expr: { $eq: ['$idList', '$$idList'] } } },
+                    {
+                      $sort: { pos: 1 },
+                    },
                   ],
                   as: 'cards',
                 },

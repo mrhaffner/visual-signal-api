@@ -3,6 +3,7 @@ import List from '../models/list';
 import Card from '../models/card';
 import Board from '../models/board';
 import mongoose from 'mongoose';
+import { getBoardById } from './controllers';
 
 const ObjectId = mongoose.Types.ObjectId;
 const pubsub = new PubSub();
@@ -12,40 +13,7 @@ const resolvers = {
     allBoards: async () => {
       return await Board.find();
     },
-    getBoardById: async (_: any, { _id }: any) => {
-      const board = await Board.aggregate([
-        {
-          $match: { _id: ObjectId(_id) },
-        },
-        {
-          $lookup: {
-            from: 'lists',
-            let: { idBoard: '$_id' },
-            pipeline: [
-              { $match: { $expr: { $eq: ['$idBoard', '$$idBoard'] } } },
-              {
-                $sort: { pos: 1 },
-              },
-              {
-                $lookup: {
-                  from: 'cards',
-                  let: { idList: '$_id' },
-                  pipeline: [
-                    { $match: { $expr: { $eq: ['$idList', '$$idList'] } } },
-                    {
-                      $sort: { pos: 1 },
-                    },
-                  ],
-                  as: 'cards',
-                },
-              },
-            ],
-            as: 'lists',
-          },
-        },
-      ]);
-      return board[0];
-    },
+    getBoardById,
     allLists: async () => {
       const lists = await List.aggregate([
         {
@@ -77,7 +45,7 @@ const resolvers = {
       const { name } = input;
       return await Board.create({ name });
     },
-    updateBoard: async (_: any, { input }: any) => {
+    updateBoardName: async (_: any, { input }: any) => {
       const { _id, name } = input;
       return await Board.findOneAndUpdate(
         { _id },
@@ -100,10 +68,15 @@ const resolvers = {
     },
     createList: async (_: any, { input }: any) => {
       const { name, pos, idBoard } = input;
-      return await List.create({ name, pos, idBoard });
+      const list = await List.create({ name, pos, idBoard });
+
+      const board = await getBoardById(_, { _id: idBoard });
+      pubsub.publish('BOARD_UPDATED', { newBoard: board });
+
+      return list;
     },
     updateListPos: async (_: any, { input }: any) => {
-      const { _id, pos } = input;
+      const { _id, pos, idBoard } = input;
       const list = await List.findOneAndUpdate(
         { _id },
         { pos },
@@ -112,30 +85,21 @@ const resolvers = {
         },
       );
 
-      const lists = await List.aggregate([
-        {
-          $lookup: {
-            from: 'cards',
-            localField: '_id',
-            foreignField: 'idList',
-            pipeline: [
-              {
-                $sort: { pos: 1 },
-              },
-            ],
-            as: 'cards',
-          },
-        },
-      ]).sort('pos');
-      pubsub.publish('BOARD_UPDATED', { newBoard: lists });
+      const board = await getBoardById(_, { _id: idBoard });
+      pubsub.publish('BOARD_UPDATED', { newBoard: board });
 
       return list;
     },
-    deleteList: async (_: any, { _id }: any) => {
+    deleteList: async (_: any, { input }: any) => {
+      const { _id, idBoard } = input;
       try {
         await List.findOneAndRemove({
           _id,
         });
+
+        const board = await getBoardById(_, { _id: idBoard });
+        pubsub.publish('BOARD_UPDATED', { newBoard: board });
+
         return _id;
       } catch (e) {
         console.log(e);
@@ -143,12 +107,17 @@ const resolvers = {
       }
     },
     createCard: async (_: any, { input }: any) => {
-      const { name, pos, idList } = input;
-      return await Card.create({ name, pos, idList });
+      const { name, pos, idList, idBoard } = input;
+      const card = await Card.create({ name, pos, idList });
+
+      const board = await getBoardById(_, { _id: idBoard });
+      pubsub.publish('BOARD_UPDATED', { newBoard: board });
+
+      return card;
     },
     //might want a seperate update function for changing card content vs position (with maybe listId depending on if it changes lists) so content/position can be required fields
     updateCardPos: async (_: any, { input }: any) => {
-      const { _id, pos, idList } = input;
+      const { _id, pos, idList, idBoard } = input;
       const updateObject = { pos };
       // @ts-ignore comment
       if (idList) updateObject.idList = idList;
@@ -162,29 +131,20 @@ const resolvers = {
         },
       );
 
-      const lists = await List.aggregate([
-        {
-          $lookup: {
-            from: 'cards',
-            localField: '_id',
-            foreignField: 'idList',
-            pipeline: [
-              {
-                $sort: { pos: 1 },
-              },
-            ],
-            as: 'cards',
-          },
-        },
-      ]).sort('pos');
-      pubsub.publish('BOARD_UPDATED', { newBoard: lists });
+      const board = await getBoardById(_, { _id: idBoard });
+      pubsub.publish('BOARD_UPDATED', { newBoard: board });
 
       return card;
     },
-    deleteCard: async (_: any, { _id }: any) => {
+    deleteCard: async (_: any, { input }: any) => {
+      const { _id, idBoard } = input;
       await Card.findOneAndRemove({
         _id,
       });
+
+      const board = await getBoardById(_, { _id: idBoard });
+      pubsub.publish('BOARD_UPDATED', { newBoard: board });
+
       return _id;
     },
   },

@@ -7,9 +7,11 @@ const mutationTypeDefs = gql`
     deleteBoard(_id: ID!): ID
     createList(input: CreateList!): List
     updateListPos(input: UpdateListPosInput!): List
+    updateListName(input: UpdateListNameInput!): List
     deleteList(input: DeleteList!): ID
     createCard(input: CreateCard!): Card
     updateCardPos(input: UpdateCardPosInput!): Card
+    updateCardName(input: UpdateCardNameInput!): Card
     deleteCard(input: DeleteCard!): ID
   }
 
@@ -34,6 +36,11 @@ const mutationTypeDefs = gql`
     idBoard: String!
   }
 
+  input UpdateListNameInput {
+    _id: ID!
+    name: String!
+  }
+
   input DeleteList {
     _id: ID!
     idBoard: String!
@@ -51,6 +58,11 @@ const mutationTypeDefs = gql`
     pos: Float!
     idList: String
     idBoard: String!
+  }
+
+  input UpdateCardNameInput {
+    _id: ID!
+    name: String!
   }
 
   input DeleteCard {

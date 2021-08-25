@@ -75,6 +75,16 @@ const resolvers = {
 
       return list;
     },
+    updateListName: async (_: any, { input }: any) => {
+      const { _id, name } = input;
+      return await List.findOneAndUpdate(
+        { _id },
+        { name },
+        {
+          new: true,
+        },
+      );
+    },
     updateListPos: async (_: any, { input }: any) => {
       const { _id, pos, idBoard } = input;
       const list = await List.findOneAndUpdate(
@@ -115,7 +125,16 @@ const resolvers = {
 
       return card;
     },
-    //might want a seperate update function for changing card content vs position (with maybe listId depending on if it changes lists) so content/position can be required fields
+    updateCardName: async (_: any, { input }: any) => {
+      const { _id, name } = input;
+      return await Card.findOneAndUpdate(
+        { _id },
+        { name },
+        {
+          new: true,
+        },
+      );
+    },
     updateCardPos: async (_: any, { input }: any) => {
       const { _id, pos, idList, idBoard } = input;
       const updateObject = { pos };

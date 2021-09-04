@@ -176,11 +176,11 @@ const resolvers = {
       //why not just put input in? will probably need to sanitize can keep for now
       return await Member.create({ fullName, password });
     },
-    updateMemberBoards: async (_: any, { input }: any) => {
-      const { _id, idBoards } = input;
+    updateMemberPassword: async (_: any, { input }: any) => {
+      const { _id, password } = input;
       return await Member.findOneAndUpdate(
         { _id },
-        { idBoards },
+        { password },
         {
           new: true,
         },

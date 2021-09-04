@@ -38,7 +38,6 @@ const schemaTypes = gql`
   type Member {
     _id: ID!
     fullName: String!
-    idBoards: [ID]
     password: String! # uh what to do with this?
     initials: String
     username: String

@@ -13,6 +13,10 @@ const resolvers = {
       return await Board.find();
     },
     getBoardById,
+    //fix this
+    getMemberBoards: async () => {
+      return await Board.find({});
+    },
     allLists: async () => {
       const lists = await List.aggregate([
         {
@@ -47,8 +51,15 @@ const resolvers = {
   },
   Mutation: {
     createBoard: async (_: any, { input }: any) => {
-      const { name } = input;
-      return await Board.create({ name });
+      const { name, idMemberCreator } = input;
+      //create new doc then save?
+      const members = [{ idMember: idMemberCreator, memberType: 'owner' }];
+      const board = await Board.create({ name, idMemberCreator, members });
+      const member = await Member.findById(idMemberCreator);
+      // @ts-ignore comment
+      member.idBoards.push(board._id);
+      await member.save();
+      return board;
     },
     updateBoardName: async (_: any, { input }: any) => {
       const { _id, name } = input;

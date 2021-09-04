@@ -14,12 +14,14 @@ const mutationTypeDefs = gql`
     updateCardName(input: UpdateCardNameInput!): Card
     deleteCard(input: DeleteCard!): ID
     createMember(input: CreateMember!): Member
+    updateMemberBoards(input: UpdateMemberBoardInput!): Member
     updateMemberPassword(input: UpdateMemberPasswordInput!): Member
     deleteMember(_id: ID!): ID
   }
 
   input CreateBoard {
     name: String!
+    idMemberCreator: String!
   }
 
   input UpdateBoardNameInput {
@@ -76,6 +78,11 @@ const mutationTypeDefs = gql`
   input CreateMember {
     fullName: String!
     password: String! # uh what to do with this?
+  }
+
+  input UpdateMemberBoardInput {
+    _id: ID!
+    password: String!
   }
 
   input UpdateMemberPasswordInput {

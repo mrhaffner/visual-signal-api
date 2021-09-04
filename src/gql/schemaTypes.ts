@@ -41,6 +41,7 @@ const schemaTypes = gql`
     password: String! # uh what to do with this?
     initials: String
     username: String
+    idBoards: [ID]
   }
 `;
 

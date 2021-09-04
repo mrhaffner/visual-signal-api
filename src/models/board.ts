@@ -16,10 +16,12 @@ const boardSchema = new Schema({
   idMemberCreator: {
     type: Schema.Types.ObjectId,
     ref: 'member',
-    requied: true,
+    required: true,
   },
   members: [memberInfo],
 });
+
+//when board is created, memberInfo for owner is automatically added to array
 
 const Board = model('Board', boardSchema);
 

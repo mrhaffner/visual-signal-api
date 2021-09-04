@@ -10,6 +10,16 @@ const memberSchema = new Schema({
   //add "status" section with field "connected" or "disconnected" to see if they are online?
 });
 
+memberSchema.virtual('initials').get(function getInitials() {
+  let name = this.fullName;
+  name
+    .split(' ')
+    .map((n: string) => n[0])
+    .join('')
+    .toUpperCase();
+  return name;
+});
+
 const Member = model('Member', memberSchema);
 
 export default Member;

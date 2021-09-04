@@ -1,10 +1,23 @@
 import { gql } from 'apollo-server-express';
 
 const schemaTypes = gql`
+  enum MemberType {
+    normal
+    admin
+    owner
+  }
+
+  type MemberInfo {
+    idMember: ID!
+    memberType: MemberType!
+  }
+
   type Board {
     _id: ID!
     name: String!
     lists: [List]
+    idMemberCreator: String!
+    members: [MemberInfo]
   }
 
   type List {
@@ -20,6 +33,15 @@ const schemaTypes = gql`
     name: String!
     pos: Float!
     idList: String!
+  }
+
+  type Member {
+    _id: ID!
+    fullName: String!
+    idBoards: [ID]
+    password: String! # uh what to do with this?
+    initials: String
+    username: String
   }
 `;
 

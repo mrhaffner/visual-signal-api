@@ -2,10 +2,9 @@ import { PubSub } from 'graphql-subscriptions';
 import List from '../models/list';
 import Card from '../models/card';
 import Board from '../models/board';
-import mongoose from 'mongoose';
+import Member from '../models/member';
 import { getBoardById } from './controllers';
 
-const ObjectId = mongoose.Types.ObjectId;
 const pubsub = new PubSub();
 
 const resolvers = {
@@ -38,6 +37,12 @@ const resolvers = {
     },
     getCardById: async (_: any, { _id }: any) => {
       return await Card.findOne({ _id });
+    },
+    getAllMembers: async () => {
+      return await Member.find();
+    },
+    getMemberById: async (_: any, { _id }: any) => {
+      return await Member.findOne({ _id });
     },
   },
   Mutation: {
@@ -165,6 +170,32 @@ const resolvers = {
       pubsub.publish('BOARD_UPDATED', { newBoard: board });
 
       return _id;
+    },
+    createMember: async (_: any, { input }: any) => {
+      const { fullName, password } = input;
+      //why not just put input in? will probably need to sanitize can keep for now
+      return await Member.create({ fullName, password });
+    },
+    updateMemberBoards: async (_: any, { input }: any) => {
+      const { _id, idBoards } = input;
+      return await Member.findOneAndUpdate(
+        { _id },
+        { idBoards },
+        {
+          new: true,
+        },
+      );
+    },
+    deleteMember: async (_: any, { _id }: any) => {
+      try {
+        await Member.findOneAndRemove({
+          _id,
+        });
+        return _id;
+      } catch (e) {
+        console.log(e);
+        return null;
+      }
     },
   },
   Subscription: {

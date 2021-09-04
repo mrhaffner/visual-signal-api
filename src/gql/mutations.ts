@@ -13,6 +13,9 @@ const mutationTypeDefs = gql`
     updateCardPos(input: UpdateCardPosInput!): Card
     updateCardName(input: UpdateCardNameInput!): Card
     deleteCard(input: DeleteCard!): ID
+    createMember(input: CreateMember!): Member
+    updateMemberBoards(input: UpdateMemberBoardsInput!): Member
+    deleteMember(_id: ID!): ID
   }
 
   input CreateBoard {
@@ -68,6 +71,16 @@ const mutationTypeDefs = gql`
   input DeleteCard {
     _id: ID!
     idBoard: String!
+  }
+
+  input CreateMember {
+    fullName: String!
+    password: String! # uh what to do with this?
+  }
+
+  input UpdateMemberBoardsInput {
+    _id: ID!
+    idBoards: [ID]!
   }
 `;
 

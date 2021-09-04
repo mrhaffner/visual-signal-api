@@ -10,18 +10,18 @@ const memberSchema = new Schema({
 
 memberSchema.virtual('initials').get(function getInitials() {
   let name = this.fullName;
-  name
+  const initials = name
     .split(' ')
     .map((n: string) => n[0])
     .join('')
     .toUpperCase();
-  return name;
+  return initials;
 });
 
 memberSchema.virtual('username').get(function getInitials() {
-  let name = this.fullName;
-  name.split(' ').join('').toLowerCase();
-  return name;
+  const name = this.fullName;
+  const initials = name.split(' ').join('').toLowerCase();
+  return initials;
 });
 
 const Member = model('Member', memberSchema);

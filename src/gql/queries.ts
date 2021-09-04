@@ -7,6 +7,8 @@ const queryTypeDefs = gql`
     allLists: [List]
     getAllCards: [Card]
     getCardById(_id: ID!): Card
+    getMemberById(_id: ID!): Member
+    getAllMembers: [Member]
   }
 `;
 

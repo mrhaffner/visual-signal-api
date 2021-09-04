@@ -14,8 +14,11 @@ const resolvers = {
     },
     getBoardById,
     //fix this
-    getMemberBoards: async () => {
-      return await Board.find({});
+    getMemberBoards: async (_: any, { _id }: any) => {
+      const member = await Member.findOne({ _id });
+      // @ts-ignore comment
+      const ids = member.idBoards;
+      return await Board.find({ _id: { $in: ids } });
     },
     allLists: async () => {
       const lists = await List.aggregate([

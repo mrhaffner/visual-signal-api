@@ -2,8 +2,6 @@ import { model, Schema } from 'mongoose';
 
 const memberSchema = new Schema({
   fullName: { type: String, required: true },
-  initials: { type: String, required: true }, //generate here?
-  username: { type: String, required: true }, //generate here?
   idBoards: [{ type: Schema.Types.ObjectId, ref: 'board' }],
   password: { type: String, required: true }, //make this safe and hashed later
   //add memberType maybe
@@ -17,6 +15,12 @@ memberSchema.virtual('initials').get(function getInitials() {
     .map((n: string) => n[0])
     .join('')
     .toUpperCase();
+  return name;
+});
+
+memberSchema.virtual('username').get(function getInitials() {
+  let name = this.fullName;
+  name.split(' ').join('').toLowerCase();
   return name;
 });
 

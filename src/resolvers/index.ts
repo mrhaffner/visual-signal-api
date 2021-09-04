@@ -76,6 +76,24 @@ const resolvers = {
     },
     deleteBoard: async (_: any, { _id }: any) => {
       try {
+        //do I need to populate subdoc?
+        const board = await Board.findById(_id);
+        // @ts-ignore comment
+        const boardMembers = board.members;
+
+        for await (const mem of boardMembers) {
+          const memberId = mem.idMember;
+          const member = await Member.findById(memberId);
+          // @ts-ignore comment
+          const memberBoards = member.idBoards;
+          const newBoards = memberBoards.filter(
+            (x: any) => x.toString() !== _id,
+          );
+          // @ts-ignore comment
+          member.idBoards = newBoards;
+          member.save();
+        }
+
         await Board.findOneAndRemove({
           _id,
         });

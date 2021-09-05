@@ -1,6 +1,7 @@
 import { model, Schema } from 'mongoose';
 
 const memberSchema = new Schema({
+  email: { type: String, required: true },
   fullName: { type: String, required: true },
   idBoards: [{ type: Schema.Types.ObjectId, ref: 'board' }],
   password: { type: String, required: true }, //make this safe and hashed later

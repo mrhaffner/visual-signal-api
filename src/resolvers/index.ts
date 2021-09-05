@@ -13,7 +13,6 @@ const resolvers = {
       return await Board.find();
     },
     getBoardById,
-    //fix this
     getMemberBoards: async (_: any, { _id }: any) => {
       const member = await Member.findOne({ _id });
       // @ts-ignore comment
@@ -208,6 +207,17 @@ const resolvers = {
       //why not just put input in? will probably need to sanitize can keep for now
       return await Member.create({ fullName, password });
     },
+    updateMemberBoards: async (_: any, { input }: any) => {
+      const { _id, boards } = input;
+      //change to single board and handle updated array here
+      return await Member.findOneAndUpdate(
+        { _id },
+        { boards },
+        {
+          new: true,
+        },
+      );
+    },
     updateMemberPassword: async (_: any, { input }: any) => {
       const { _id, password } = input;
       return await Member.findOneAndUpdate(
@@ -223,6 +233,7 @@ const resolvers = {
         await Member.findOneAndRemove({
           _id,
         });
+        //need to delete reference to member in all boards that contain them as a member
         return _id;
       } catch (e) {
         console.log(e);

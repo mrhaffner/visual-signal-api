@@ -78,11 +78,12 @@ const mutationTypeDefs = gql`
   input CreateMember {
     fullName: String!
     password: String! # uh what to do with this?
+    email: String!
   }
 
   input UpdateMemberBoardInput {
     _id: ID!
-    password: String!
+    boards: [String]! #change to single board, let back handle
   }
 
   input UpdateMemberPasswordInput {

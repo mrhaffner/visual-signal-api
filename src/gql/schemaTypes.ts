@@ -42,6 +42,7 @@ const schemaTypes = gql`
     initials: String
     username: String
     idBoards: [ID]
+    email: String!
   }
 `;
 

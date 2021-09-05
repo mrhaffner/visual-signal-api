@@ -203,9 +203,9 @@ const resolvers = {
       return _id;
     },
     createMember: async (_: any, { input }: any) => {
-      const { fullName, password } = input;
+      const { fullName, password, email } = input;
       //why not just put input in? will probably need to sanitize can keep for now
-      return await Member.create({ fullName, password });
+      return await Member.create({ fullName, password, email });
     },
     updateMemberBoards: async (_: any, { input }: any) => {
       const { _id, boards } = input;

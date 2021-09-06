@@ -162,14 +162,17 @@ const resolvers = {
       return card;
     },
     updateCardName: async (_: any, { input }: any) => {
-      const { _id, name } = input;
-      return await Card.findOneAndUpdate(
+      const { _id, name, idBoard } = input;
+      const card = await Card.findOneAndUpdate(
         { _id },
         { name },
         {
           new: true,
         },
       );
+      const board = await getBoardById(_, { _id: idBoard });
+      pubsub.publish('BOARD_UPDATED', { newBoard: board });
+      return card;
     },
     updateCardPos: async (_: any, { input }: any) => {
       const { _id, pos, idList, idBoard } = input;

@@ -68,6 +68,7 @@ const mutationTypeDefs = gql`
   input UpdateCardNameInput {
     _id: ID!
     name: String!
+    idBoard: String!
   }
 
   input DeleteCard {

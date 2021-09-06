@@ -77,7 +77,8 @@ const resolvers = {
       pubsub.publish('BOARD_LIST_UPDATED', { newBoardList: boards });
       return board;
     },
-    deleteBoard: async (_: any, { _id }: any) => {
+    deleteBoard: async (_: any, { input }: any) => {
+      const { _id, idMember } = input;
       try {
         //do I need to populate subdoc?
         const board = await Board.findById(_id);
@@ -101,6 +102,9 @@ const resolvers = {
           _id,
         });
         pubsub.publish('BOARD_UPDATED', { newBoard: [] });
+        const boards = await getMemberBoards(_, { _id: idMember });
+
+        pubsub.publish('BOARD_LIST_UPDATED', { newBoardList: boards });
         return _id;
       } catch (e) {
         console.log(e);

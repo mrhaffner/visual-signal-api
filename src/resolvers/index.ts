@@ -3,7 +3,7 @@ import List from '../models/list';
 import Card from '../models/card';
 import Board from '../models/board';
 import Member from '../models/member';
-import { getBoardById } from './controllers';
+import { getBoardById, getMemberBoards } from './controllers';
 
 const pubsub = new PubSub();
 
@@ -13,12 +13,7 @@ const resolvers = {
       return await Board.find();
     },
     getBoardById,
-    getMemberBoards: async (_: any, { _id }: any) => {
-      const member = await Member.findOne({ _id });
-      // @ts-ignore comment
-      const ids = member.idBoards;
-      return await Board.find({ _id: { $in: ids } });
-    },
+    getMemberBoards,
     allLists: async () => {
       const lists = await List.aggregate([
         {
@@ -61,6 +56,9 @@ const resolvers = {
       // @ts-ignore comment
       member.idBoards.push(board._id);
       await member.save();
+
+      const boards = await getMemberBoards(_, { _id: idMemberCreator });
+      pubsub.publish('BOARD_LIST_UPDATED', { newBoardList: boards });
       return board;
       //needs to update board list via pubsub
     },
@@ -257,6 +255,9 @@ const resolvers = {
   Subscription: {
     newBoard: {
       subscribe: () => pubsub.asyncIterator(['BOARD_UPDATED']),
+    },
+    newBoardList: {
+      subscribe: () => pubsub.asyncIterator(['BOARD_LIST_UPDATED']),
     },
   },
 };

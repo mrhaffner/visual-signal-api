@@ -62,16 +62,20 @@ const resolvers = {
       member.idBoards.push(board._id);
       await member.save();
       return board;
+      //needs to update board list via pubsub
     },
     updateBoardName: async (_: any, { input }: any) => {
       const { _id, name } = input;
-      return await Board.findOneAndUpdate(
+      await Board.findOneAndUpdate(
         { _id },
         { name },
         {
           new: true,
         },
       );
+      const board = await getBoardById(_, { _id });
+      pubsub.publish('BOARD_UPDATED', { newBoard: board });
+      return board;
     },
     deleteBoard: async (_: any, { _id }: any) => {
       try {

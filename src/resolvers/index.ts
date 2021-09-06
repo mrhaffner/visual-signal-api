@@ -100,6 +100,7 @@ const resolvers = {
         await Board.findOneAndRemove({
           _id,
         });
+        pubsub.publish('BOARD_UPDATED', { newBoard: [] });
         return _id;
       } catch (e) {
         console.log(e);

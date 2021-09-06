@@ -34,5 +34,5 @@ export const getBoardById = async (_: any, { _id }: any) => {
       },
     },
   ]);
-  return board[0];
+  return board; //board[0]
 };

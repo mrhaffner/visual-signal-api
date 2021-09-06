@@ -3,7 +3,7 @@ import { gql } from 'apollo-server-express';
 const mutationTypeDefs = gql`
   type Mutation {
     createBoard(input: CreateBoard!): Board
-    updateBoardName(input: UpdateBoardNameInput!): Board
+    updateBoardName(input: UpdateBoardNameInput!): [Board]
     deleteBoard(_id: ID!): ID
     createList(input: CreateList!): List
     updateListPos(input: UpdateListPosInput!): List

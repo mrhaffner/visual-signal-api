@@ -63,7 +63,7 @@ const resolvers = {
       //needs to update board list via pubsub
     },
     updateBoardName: async (_: any, { input }: any) => {
-      const { _id, name } = input;
+      const { _id, name, idMember } = input;
       await Board.findOneAndUpdate(
         { _id },
         { name },
@@ -73,6 +73,8 @@ const resolvers = {
       );
       const board = await getBoardById(_, { _id });
       pubsub.publish('BOARD_UPDATED', { newBoard: board });
+      const boards = await getMemberBoards(_, { _id: idMember });
+      pubsub.publish('BOARD_LIST_UPDATED', { newBoardList: boards });
       return board;
     },
     deleteBoard: async (_: any, { _id }: any) => {

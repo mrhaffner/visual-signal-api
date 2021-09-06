@@ -27,6 +27,7 @@ const mutationTypeDefs = gql`
   input UpdateBoardNameInput {
     _id: ID!
     name: String!
+    idMember: String!
   }
 
   input CreateList {

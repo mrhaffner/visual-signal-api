@@ -112,14 +112,19 @@ const resolvers = {
       return list;
     },
     updateListName: async (_: any, { input }: any) => {
-      const { _id, name } = input;
-      return await List.findOneAndUpdate(
+      const { _id, name, idBoard } = input;
+      const list = await List.findOneAndUpdate(
         { _id },
         { name },
         {
           new: true,
         },
       );
+
+      const board = await getBoardById(_, { _id: idBoard });
+
+      pubsub.publish('BOARD_UPDATED', { newBoard: board });
+      return list;
     },
     updateListPos: async (_: any, { input }: any) => {
       const { _id, pos, idBoard } = input;

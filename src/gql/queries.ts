@@ -8,7 +8,7 @@ const queryTypeDefs = gql`
     allLists: [List]
     getAllCards: [Card]
     getCardById(_id: ID!): Card
-    getMemberById(_id: ID!): Member
+    getMemberByEmail(email: String!): Member
     getAllMembers: [Member]
   }
 `;

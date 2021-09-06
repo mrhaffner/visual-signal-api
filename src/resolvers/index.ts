@@ -47,8 +47,8 @@ const resolvers = {
     getAllMembers: async () => {
       return await Member.find();
     },
-    getMemberById: async (_: any, { _id }: any) => {
-      return await Member.findOne({ _id });
+    getMemberByEmail: async (_: any, { email }: any) => {
+      return await Member.findOne({ email });
     },
   },
   Mutation: {

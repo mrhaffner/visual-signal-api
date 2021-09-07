@@ -7,6 +7,7 @@ import { makeExecutableSchema } from '@graphql-tools/schema';
 import mongoose from 'mongoose';
 import typeDefs from './gql';
 import resolvers from './resolvers';
+import context from './context';
 
 (async () => {
   const PORT = 8080;
@@ -29,6 +30,7 @@ import resolvers from './resolvers';
 
   const server = new ApolloServer({
     schema,
+    context,
   });
   await server.start();
   server.applyMiddleware({ app });

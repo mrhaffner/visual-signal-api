@@ -4,12 +4,19 @@ import Card from '../models/card';
 import Board from '../models/board';
 import Member from '../models/member';
 import { getBoardById, getMemberBoards } from './controllers';
+import { UserInputError } from 'apollo-server-errors';
+import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
 
+dotenv.config();
 const pubsub = new PubSub();
+const JWT_SECRET = process.env.JWT_SECRET;
 
 const resolvers = {
   Query: {
-    allBoards: async () => {
+    allBoards: async (_: any, __: any, context: any) => {
+      console.log(context);
+
       return await Board.find();
     },
     getBoardById,
@@ -256,6 +263,24 @@ const resolvers = {
         console.log(e);
         return null;
       }
+    },
+    login: async (_: any, { input }: any) => {
+      const { email, password } = input;
+      const member = await Member.findOne({ email });
+
+      //@ts-ignore
+      if (!member || password !== member.password) {
+        throw new UserInputError('wrong credentials');
+      }
+      const memberForToken = {
+        id: member._id,
+        //@ts-ignore
+        email: member.email,
+      };
+
+      return {
+        value: jwt.sign(memberForToken, JWT_SECRET, { expiresIn: '1h' }),
+      };
     },
   },
   Subscription: {

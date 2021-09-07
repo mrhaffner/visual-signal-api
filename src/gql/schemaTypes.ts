@@ -38,11 +38,15 @@ const schemaTypes = gql`
   type Member {
     _id: ID!
     fullName: String!
-    password: String! # uh what to do with this?
+    password: String! # uh what to do with this? hash that
     initials: String
     username: String
     idBoards: [ID]
     email: String!
+  }
+
+  type Token {
+    value: String!
   }
 `;
 

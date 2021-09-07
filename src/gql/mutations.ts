@@ -17,6 +17,7 @@ const mutationTypeDefs = gql`
     updateMemberBoards(input: UpdateMemberBoardInput!): Member
     updateMemberPassword(input: UpdateMemberPasswordInput!): Member
     deleteMember(_id: ID!): ID
+    login(input: LoginInput!): Token
   }
 
   input CreateBoard {
@@ -85,7 +86,7 @@ const mutationTypeDefs = gql`
 
   input CreateMember {
     fullName: String!
-    password: String! # uh what to do with this?
+    password: String! # uh what to do with this? hash it
     email: String!
   }
 
@@ -96,6 +97,11 @@ const mutationTypeDefs = gql`
 
   input UpdateMemberPasswordInput {
     _id: ID!
+    password: String!
+  }
+
+  input LoginInput {
+    email: String!
     password: String!
   }
 `;

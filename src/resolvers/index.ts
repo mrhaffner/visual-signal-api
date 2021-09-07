@@ -14,12 +14,10 @@ const JWT_SECRET = process.env.JWT_SECRET;
 
 const resolvers = {
   Query: {
-    allBoards: async (_: any, __: any, context: any) => {
-      console.log(context);
-
+    allBoards: async () => {
       return await Board.find();
-    },
-    getBoardById,
+    }, //
+    getBoardById, //~
     getMemberBoards,
     allLists: async () => {
       const lists = await List.aggregate([
@@ -69,7 +67,7 @@ const resolvers = {
       return board;
       //needs to update board list via pubsub
     },
-    updateBoardName: async (_: any, { input }: any) => {
+    updateBoardName: async (_: any, { input }: any, ctx: any) => {
       const { _id, name, idMember } = input;
       await Board.findOneAndUpdate(
         { _id },
@@ -78,7 +76,8 @@ const resolvers = {
           new: true,
         },
       );
-      const board = await getBoardById(_, { _id });
+      //these are repeated make them their own functions
+      const board = await getBoardById(_, { _id }, ctx);
       pubsub.publish('BOARD_UPDATED', { newBoard: board });
       const boards = await getMemberBoards(_, { _id: idMember });
       pubsub.publish('BOARD_LIST_UPDATED', { newBoardList: boards });
@@ -118,16 +117,16 @@ const resolvers = {
         return null;
       }
     },
-    createList: async (_: any, { input }: any) => {
+    createList: async (_: any, { input }: any, ctx: any) => {
       const { name, pos, idBoard } = input;
       const list = await List.create({ name, pos, idBoard });
 
-      const board = await getBoardById(_, { _id: idBoard });
+      const board = await getBoardById(_, { _id: idBoard }, ctx);
       pubsub.publish('BOARD_UPDATED', { newBoard: board });
 
       return list;
     },
-    updateListName: async (_: any, { input }: any) => {
+    updateListName: async (_: any, { input }: any, ctx: any) => {
       const { _id, name, idBoard } = input;
       const list = await List.findOneAndUpdate(
         { _id },
@@ -137,12 +136,12 @@ const resolvers = {
         },
       );
 
-      const board = await getBoardById(_, { _id: idBoard });
+      const board = await getBoardById(_, { _id: idBoard }, ctx);
 
       pubsub.publish('BOARD_UPDATED', { newBoard: board });
       return list;
     },
-    updateListPos: async (_: any, { input }: any) => {
+    updateListPos: async (_: any, { input }: any, ctx: any) => {
       const { _id, pos, idBoard } = input;
       const list = await List.findOneAndUpdate(
         { _id },
@@ -152,19 +151,19 @@ const resolvers = {
         },
       );
 
-      const board = await getBoardById(_, { _id: idBoard });
+      const board = await getBoardById(_, { _id: idBoard }, ctx);
       pubsub.publish('BOARD_UPDATED', { newBoard: board });
 
       return list;
     },
-    deleteList: async (_: any, { input }: any) => {
+    deleteList: async (_: any, { input }: any, ctx: any) => {
       const { _id, idBoard } = input;
       try {
         await List.findOneAndRemove({
           _id,
         });
 
-        const board = await getBoardById(_, { _id: idBoard });
+        const board = await getBoardById(_, { _id: idBoard }, ctx);
         pubsub.publish('BOARD_UPDATED', { newBoard: board });
 
         return _id;
@@ -173,16 +172,16 @@ const resolvers = {
         return null;
       }
     },
-    createCard: async (_: any, { input }: any) => {
+    createCard: async (_: any, { input }: any, ctx: any) => {
       const { name, pos, idList, idBoard } = input;
       const card = await Card.create({ name, pos, idList });
 
-      const board = await getBoardById(_, { _id: idBoard });
+      const board = await getBoardById(_, { _id: idBoard }, ctx);
       pubsub.publish('BOARD_UPDATED', { newBoard: board });
 
       return card;
     },
-    updateCardName: async (_: any, { input }: any) => {
+    updateCardName: async (_: any, { input }: any, ctx: any) => {
       const { _id, name, idBoard } = input;
       const card = await Card.findOneAndUpdate(
         { _id },
@@ -191,11 +190,11 @@ const resolvers = {
           new: true,
         },
       );
-      const board = await getBoardById(_, { _id: idBoard });
+      const board = await getBoardById(_, { _id: idBoard }, ctx);
       pubsub.publish('BOARD_UPDATED', { newBoard: board });
       return card;
     },
-    updateCardPos: async (_: any, { input }: any) => {
+    updateCardPos: async (_: any, { input }: any, ctx: any) => {
       const { _id, pos, idList, idBoard } = input;
       const updateObject = { pos };
       // @ts-ignore comment
@@ -210,18 +209,18 @@ const resolvers = {
         },
       );
 
-      const board = await getBoardById(_, { _id: idBoard });
+      const board = await getBoardById(_, { _id: idBoard }, ctx);
       pubsub.publish('BOARD_UPDATED', { newBoard: board });
 
       return card;
     },
-    deleteCard: async (_: any, { input }: any) => {
+    deleteCard: async (_: any, { input }: any, ctx: any) => {
       const { _id, idBoard } = input;
       await Card.findOneAndRemove({
         _id,
       });
 
-      const board = await getBoardById(_, { _id: idBoard });
+      const board = await getBoardById(_, { _id: idBoard }, ctx);
       pubsub.publish('BOARD_UPDATED', { newBoard: board });
 
       return _id;

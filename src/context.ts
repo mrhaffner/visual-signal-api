@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 const JWT_SECRET = process.env.JWT_SECRET;
-
+//invalid token, then what? just a fucking error?
 //does this need to update constantly? is it subscriptions?
 const context = async ({ req }: any) => {
   const auth = req ? req.headers.authorization : null;

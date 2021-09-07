@@ -4,7 +4,7 @@ const queryTypeDefs = gql`
   type Query {
     allBoards: [Board]
     getBoardById(_id: ID!): [Board]
-    getMemberBoards(_id: ID!): [Board]
+    getMyBoards: [Board]
     allLists: [List]
     getAllCards: [Card]
     getCardById(_id: ID!): Card

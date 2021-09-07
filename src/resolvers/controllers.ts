@@ -46,8 +46,11 @@ export const getBoardById = async (
   return board; //board[0]
 };
 
-export const getMemberBoards = async (_: any, { _id }: any) => {
-  const member = await Member.findOne({ _id });
+export const getMyBoards = async (_: any, __: any, { currentMember }: any) => {
+  if (!currentMember) {
+    throw new AuthenticationError('Not authenticated');
+  }
+  const member = await Member.findOne({ _id: currentMember._id });
   // @ts-ignore comment
   const ids = member.idBoards;
   return await Board.find({ _id: { $in: ids } });

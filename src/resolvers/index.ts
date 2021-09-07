@@ -3,7 +3,7 @@ import List from '../models/list';
 import Card from '../models/card';
 import Board from '../models/board';
 import Member from '../models/member';
-import { getBoardById, getMemberBoards } from './controllers';
+import { getBoardById, getMyBoards } from './controllers';
 import { UserInputError } from 'apollo-server-errors';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
@@ -16,9 +16,9 @@ const resolvers = {
   Query: {
     allBoards: async () => {
       return await Board.find();
-    }, //
-    getBoardById, //~
-    getMemberBoards,
+    },
+    getBoardById,
+    getMyBoards, //
     allLists: async () => {
       const lists = await List.aggregate([
         {
@@ -52,7 +52,7 @@ const resolvers = {
     },
   },
   Mutation: {
-    createBoard: async (_: any, { input }: any) => {
+    createBoard: async (_: any, { input }: any, ctx: any) => {
       const { name, idMemberCreator } = input;
       //create new doc then save?
       const members = [{ idMember: idMemberCreator, memberType: 'owner' }];
@@ -62,7 +62,7 @@ const resolvers = {
       member.idBoards.push(board._id);
       await member.save();
 
-      const boards = await getMemberBoards(_, { _id: idMemberCreator });
+      const boards = await getMyBoards(_, input, ctx);
       pubsub.publish('BOARD_LIST_UPDATED', { newBoardList: boards });
       return board;
       //needs to update board list via pubsub
@@ -79,11 +79,11 @@ const resolvers = {
       //these are repeated make them their own functions
       const board = await getBoardById(_, { _id }, ctx);
       pubsub.publish('BOARD_UPDATED', { newBoard: board });
-      const boards = await getMemberBoards(_, { _id: idMember });
+      const boards = await getMyBoards(_, input, ctx);
       pubsub.publish('BOARD_LIST_UPDATED', { newBoardList: boards });
       return board;
     },
-    deleteBoard: async (_: any, { input }: any) => {
+    deleteBoard: async (_: any, { input }: any, ctx: any) => {
       const { _id, idMember } = input;
       try {
         //do I need to populate subdoc?
@@ -108,7 +108,7 @@ const resolvers = {
           _id,
         });
         pubsub.publish('BOARD_UPDATED', { newBoard: [] });
-        const boards = await getMemberBoards(_, { _id: idMember });
+        const boards = await getMyBoards(_, input, ctx);
 
         pubsub.publish('BOARD_LIST_UPDATED', { newBoardList: boards });
         return _id;

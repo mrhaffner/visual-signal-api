@@ -201,6 +201,9 @@ const resolvers = {
     },
     createCard: async (_: any, { input }: any, ctx: any) => {
       const { name, pos, idList, idBoard } = input;
+      if (!ctx.currentMember || !ctx.currentMember.idBoards.includes(idBoard)) {
+        throw new AuthenticationError('Not authenticated or authorized');
+      }
       const card = await Card.create({ name, pos, idList });
 
       const board = await getBoardById(_, { _id: idBoard }, ctx);
@@ -210,6 +213,9 @@ const resolvers = {
     },
     updateCardName: async (_: any, { input }: any, ctx: any) => {
       const { _id, name, idBoard } = input;
+      if (!ctx.currentMember || !ctx.currentMember.idBoards.includes(idBoard)) {
+        throw new AuthenticationError('Not authenticated or authorized');
+      }
       const card = await Card.findOneAndUpdate(
         { _id },
         { name },
@@ -223,6 +229,9 @@ const resolvers = {
     },
     updateCardPos: async (_: any, { input }: any, ctx: any) => {
       const { _id, pos, idList, idBoard } = input;
+      if (!ctx.currentMember || !ctx.currentMember.idBoards.includes(idBoard)) {
+        throw new AuthenticationError('Not authenticated or authorized');
+      }
       const updateObject = { pos };
       // @ts-ignore comment
       if (idList) updateObject.idList = idList;
@@ -243,6 +252,9 @@ const resolvers = {
     },
     deleteCard: async (_: any, { input }: any, ctx: any) => {
       const { _id, idBoard } = input;
+      if (!ctx.currentMember || !ctx.currentMember.idBoards.includes(idBoard)) {
+        throw new AuthenticationError('Not authenticated or authorized');
+      }
       await Card.findOneAndRemove({
         _id,
       });

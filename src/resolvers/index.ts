@@ -97,8 +97,10 @@ const resolvers = {
       pubsub.publish('BOARD_LIST_UPDATED', { newBoardList: boards });
       return board;
     },
-    deleteBoard: async (_: any, { input }: any, ctx: any) => {
-      const { _id, idMember } = input;
+    deleteBoard: async (_: any, { _id }: any, ctx: any) => {
+      if (!ctx.currentMember || !ctx.currentMember.idBoards.includes(_id)) {
+        throw new AuthenticationError('Not authenticated or authorized');
+      }
       try {
         //do I need to populate subdoc?
         const board = await Board.findById(_id);
@@ -122,8 +124,7 @@ const resolvers = {
           _id,
         });
         pubsub.publish('BOARD_UPDATED', { newBoard: [] });
-        const boards = await getMyBoards(_, input, ctx);
-
+        const boards = await getMyBoards(_, _id, ctx);
         pubsub.publish('BOARD_LIST_UPDATED', { newBoardList: boards });
         return _id;
       } catch (e) {
@@ -133,6 +134,9 @@ const resolvers = {
     },
     createList: async (_: any, { input }: any, ctx: any) => {
       const { name, pos, idBoard } = input;
+      if (!ctx.currentMember || !ctx.currentMember.idBoards.includes(idBoard)) {
+        throw new AuthenticationError('Not authenticated or authorized');
+      }
       const list = await List.create({ name, pos, idBoard });
 
       const board = await getBoardById(_, { _id: idBoard }, ctx);
@@ -142,6 +146,9 @@ const resolvers = {
     },
     updateListName: async (_: any, { input }: any, ctx: any) => {
       const { _id, name, idBoard } = input;
+      if (!ctx.currentMember || !ctx.currentMember.idBoards.includes(idBoard)) {
+        throw new AuthenticationError('Not authenticated or authorized');
+      }
       const list = await List.findOneAndUpdate(
         { _id },
         { name },
@@ -157,6 +164,9 @@ const resolvers = {
     },
     updateListPos: async (_: any, { input }: any, ctx: any) => {
       const { _id, pos, idBoard } = input;
+      if (!ctx.currentMember || !ctx.currentMember.idBoards.includes(idBoard)) {
+        throw new AuthenticationError('Not authenticated or authorized');
+      }
       const list = await List.findOneAndUpdate(
         { _id },
         { pos },
@@ -172,6 +182,9 @@ const resolvers = {
     },
     deleteList: async (_: any, { input }: any, ctx: any) => {
       const { _id, idBoard } = input;
+      if (!ctx.currentMember || !ctx.currentMember.idBoards.includes(idBoard)) {
+        throw new AuthenticationError('Not authenticated or authorized');
+      }
       try {
         await List.findOneAndRemove({
           _id,

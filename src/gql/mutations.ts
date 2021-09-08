@@ -4,7 +4,7 @@ const mutationTypeDefs = gql`
   type Mutation {
     createBoard(name: String!): Board
     updateBoardName(input: UpdateBoardNameInput!): [Board]
-    deleteBoard(input: DeleteBoardInput!): ID
+    deleteBoard(_id: ID!): ID
     createList(input: CreateList!): List
     updateListPos(input: UpdateListPosInput!): List
     updateListName(input: UpdateListNameInput!): List
@@ -23,11 +23,6 @@ const mutationTypeDefs = gql`
   input UpdateBoardNameInput {
     _id: ID!
     name: String!
-  }
-
-  input DeleteBoardInput {
-    _id: ID!
-    idMember: String!
   }
 
   input CreateList {

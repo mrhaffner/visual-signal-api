@@ -267,7 +267,16 @@ const resolvers = {
     createMember: async (_: any, { input }: any) => {
       const { fullName, password, email } = input;
       //why not just put input in? will probably need to sanitize can keep for now
-      return await Member.create({ fullName, password, email });
+      const member = await Member.create({ fullName, password, email });
+      const memberForToken = {
+        id: member._id,
+        //@ts-ignore
+        email: member.email,
+      };
+
+      return {
+        value: jwt.sign(memberForToken, JWT_SECRET, { expiresIn: '1h' }),
+      };
     },
     updateMemberBoards: async (_: any, { input }: any) => {
       const { _id, boards } = input;
@@ -279,7 +288,7 @@ const resolvers = {
           new: true,
         },
       );
-    },
+    }, //not currently used
     updateMemberPassword: async (_: any, { input }: any) => {
       const { _id, password } = input;
       return await Member.findOneAndUpdate(
@@ -289,7 +298,7 @@ const resolvers = {
           new: true,
         },
       );
-    },
+    }, //not currently used
     deleteMember: async (_: any, { _id }: any) => {
       try {
         await Member.findOneAndRemove({
@@ -301,7 +310,7 @@ const resolvers = {
         console.log(e);
         return null;
       }
-    },
+    }, //not currently used
     login: async (_: any, { input }: any) => {
       const { email, password } = input;
       const member = await Member.findOne({ email });

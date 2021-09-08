@@ -78,7 +78,11 @@ const resolvers = {
       return board;
     },
     updateBoardName: async (_: any, { input }: any, ctx: any) => {
-      const { _id, name, idMember } = input;
+      const { _id, name } = input;
+
+      if (!ctx.currentMember || !ctx.currentMember.idBoards.includes(_id)) {
+        throw new AuthenticationError('Not authenticated or authorized');
+      }
       await Board.findOneAndUpdate(
         { _id },
         { name },

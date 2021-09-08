@@ -55,21 +55,25 @@ const resolvers = {
     }, //may be used in the future, probably needs a version for admins and non admids or some sort of auth
   },
   Mutation: {
-    createBoard: async (_: any, { input }: any, ctx: any) => {
+    createBoard: async (_: any, { name }: any, ctx: any) => {
       if (!ctx.currentMember) {
         throw new AuthenticationError('Not authenticated');
       } ////work here
-      //don't need member id as input anymore!
-      const { name, idMemberCreator } = input;
+      const idMemberCreator = ctx.currentMember._id;
       //create new doc then save?
       const members = [{ idMember: idMemberCreator, memberType: 'owner' }];
-      const board = await Board.create({ name, idMemberCreator, members });
-      const member = await Member.findById(idMemberCreator);
+      const board = await Board.create({
+        name,
+        idMemberCreator,
+        members,
+      });
+      // const member = await Member.findById(idMemberCreator);
+      const member = ctx.currentMember;
       // @ts-ignore comment
       member.idBoards.push(board._id);
       await member.save();
 
-      const boards = await getMyBoards(_, input, ctx);
+      const boards = await getMyBoards(_, name, ctx);
       pubsub.publish('BOARD_LIST_UPDATED', { newBoardList: boards });
       return board;
     },
@@ -82,7 +86,7 @@ const resolvers = {
           new: true,
         },
       );
-      //these are repeated make them their own functions
+      //these are repeated make them their own functions or a hook?
       const board = await getBoardById(_, { _id }, ctx);
       pubsub.publish('BOARD_UPDATED', { newBoard: board });
       const boards = await getMyBoards(_, input, ctx);

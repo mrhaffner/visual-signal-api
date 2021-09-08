@@ -8,6 +8,7 @@ const queryTypeDefs = gql`
     allLists: [List]
     getAllCards: [Card]
     getCardById(_id: ID!): Card
+    getMyMemberInfo: Member
     getMemberByEmail(email: String!): Member
     getAllMembers: [Member]
   }

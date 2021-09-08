@@ -4,7 +4,7 @@ import Card from '../models/card';
 import Board from '../models/board';
 import Member from '../models/member';
 import { getBoardById, getMyBoards } from './controllers';
-import { UserInputError } from 'apollo-server-errors';
+import { AuthenticationError, UserInputError } from 'apollo-server-errors';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 
@@ -16,9 +16,9 @@ const resolvers = {
   Query: {
     allBoards: async () => {
       return await Board.find();
-    },
+    }, //for testing only
     getBoardById,
-    getMyBoards, //
+    getMyBoards,
     allLists: async () => {
       const lists = await List.aggregate([
         {
@@ -36,23 +36,30 @@ const resolvers = {
         },
       ]).sort('pos');
       return lists;
-    },
-    //probably don't need this except for testing
+    }, //for testing only
     getAllCards: async () => {
       return await Card.find();
-    },
+    }, //for testing only
     getCardById: async (_: any, { _id }: any) => {
       return await Card.findOne({ _id });
+    }, //for testing now, but may be used later
+    getMyMemberInfo: async (_: any, __: any, ctx: any) => {
+      //make this so it only returs the needed fields, definitely not password
+      return ctx.currentMember;
     },
     getAllMembers: async () => {
       return await Member.find();
-    },
+    }, //for testing only
     getMemberByEmail: async (_: any, { email }: any) => {
       return await Member.findOne({ email });
-    },
+    }, //may be used in the future, probably needs a version for admins and non admids or some sort of auth
   },
   Mutation: {
     createBoard: async (_: any, { input }: any, ctx: any) => {
+      if (!ctx.currentMember) {
+        throw new AuthenticationError('Not authenticated');
+      } ////work here
+      //don't need member id as input anymore!
       const { name, idMemberCreator } = input;
       //create new doc then save?
       const members = [{ idMember: idMemberCreator, memberType: 'owner' }];
@@ -65,7 +72,6 @@ const resolvers = {
       const boards = await getMyBoards(_, input, ctx);
       pubsub.publish('BOARD_LIST_UPDATED', { newBoardList: boards });
       return board;
-      //needs to update board list via pubsub
     },
     updateBoardName: async (_: any, { input }: any, ctx: any) => {
       const { _id, name, idMember } = input;

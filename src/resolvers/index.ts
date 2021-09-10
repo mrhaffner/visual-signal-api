@@ -6,6 +6,7 @@ import Member from '../models/member';
 import { getBoardById, getMyBoards } from './controllers';
 import { AuthenticationError, UserInputError } from 'apollo-server-errors';
 import jwt from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -267,7 +268,14 @@ const resolvers = {
     createMember: async (_: any, { input }: any) => {
       const { fullName, password, email } = input;
       //why not just put input in? will probably need to sanitize can keep for now
-      const member = await Member.create({ fullName, password, email });
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(password, salt);
+
+      const member = await Member.create({
+        fullName,
+        password: hashedPassword,
+        email,
+      });
       const memberForToken = {
         id: member._id,
         //@ts-ignore
@@ -314,9 +322,10 @@ const resolvers = {
     login: async (_: any, { input }: any) => {
       const { email, password } = input;
       const member = await Member.findOne({ email });
-
       //@ts-ignore
-      if (!member || password !== member.password) {
+      const validPassword = await bcrypt.compare(password, member.password);
+
+      if (!member || !validPassword) {
         throw new UserInputError('wrong credentials');
       }
       const memberForToken = {

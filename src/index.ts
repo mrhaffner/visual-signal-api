@@ -4,10 +4,17 @@ import { execute, subscribe } from 'graphql';
 import { ApolloServer } from 'apollo-server-express';
 import { SubscriptionServer } from 'subscriptions-transport-ws';
 import { makeExecutableSchema } from '@graphql-tools/schema';
-import mongoose from 'mongoose';
+import mongoose, { connection } from 'mongoose';
 import typeDefs from './gql';
 import resolvers from './resolvers';
 import context from './context';
+import onConnect from './onConnect';
+import jwt from 'jsonwebtoken';
+import Member from './models/member';
+import dotenv from 'dotenv';
+
+dotenv.config();
+const JWT_SECRET = process.env.JWT_SECRET;
 
 (async () => {
   const PORT = 8080;
@@ -36,7 +43,19 @@ import context from './context';
   server.applyMiddleware({ app });
 
   SubscriptionServer.create(
-    { schema, execute, subscribe },
+    {
+      schema,
+      execute,
+      subscribe,
+      onConnect,
+      // onOperation: (message: any, params: any, webSocket: any) => {
+      //   console.log(message);
+      //   console.log(params.authToken);
+      //   console.log(webSocket.upgradeReq.headers);
+
+      //   return { ...params, context: { user: 'me' } };
+      // },
+    },
     { server: httpServer, path: server.graphqlPath },
   );
 

@@ -81,7 +81,6 @@ const resolvers = {
     },
     updateBoardName: async (_: any, { input }: any, ctx: any) => {
       const { _id, name } = input;
-
       if (!ctx.currentMember || !ctx.currentMember.idBoards.includes(_id)) {
         throw new AuthenticationError('Not authenticated or authorized');
       }
@@ -128,6 +127,8 @@ const resolvers = {
         pubsub.publish('BOARD_UPDATED', { newBoard: [] });
         const boards = await getMyBoards(_, _id, ctx);
         pubsub.publish('BOARD_LIST_UPDATED', { newBoardList: boards });
+        console.log(_id);
+
         return _id;
       } catch (e) {
         console.log(e);
@@ -345,23 +346,36 @@ const resolvers = {
       subscribe: withFilter(
         () => pubsub.asyncIterator('BOARD_LIST_UPDATED'),
         (payload, variables) => {
+          // console.log(payload, variables);
+
           //O(n^2) lmao
           //perhaps this subscriptions returns a single Board and on the front the cache is updated based on the board returned?
           //that would require a different subscription though for delete, update and add...
-          for (const x of payload.newBoardList) {
-            for (const y of x.members) {
-              if (y.idMember.toString() === variables.memberId) return true;
+          try {
+            for (const x of payload.newBoardList) {
+              for (const y of x.members) {
+                if (y.idMember.toString() === variables.memberId) return true;
+              }
             }
+            return false;
+          } catch (e) {
+            console.log(e);
           }
-          return false;
         },
       ),
     },
     newBoard: {
       subscribe: withFilter(
         () => pubsub.asyncIterator('BOARD_UPDATED'),
-        (payload, variables) => {
-          return payload.newBoard[0]._id.toString() === variables.idBoard;
+        (payload, variables, ctx) => {
+          // console.log(payload, variables);
+          console.log(ctx);
+
+          try {
+            return payload.newBoard[0]._id.toString() === variables.idBoard;
+          } catch (e) {
+            console.log(e);
+          }
         },
       ),
     },

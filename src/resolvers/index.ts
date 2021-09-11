@@ -358,14 +358,13 @@ const resolvers = {
       ),
     },
     newBoard: {
-      subscribe: () => pubsub.asyncIterator(['BOARD_UPDATED']),
+      subscribe: withFilter(
+        () => pubsub.asyncIterator('BOARD_UPDATED'),
+        (payload, variables) => {
+          return payload.newBoard[0]._id.toString() === variables.idBoard;
+        },
+      ),
     },
-    // newBoard: {
-    //   subscribe: () => pubsub.asyncIterator(['BOARD_UPDATED']),
-    // },
-    // newBoardList: {
-    //   subscribe: () => pubsub.asyncIterator(['BOARD_LIST_UPDATED']),
-    // },
   },
 };
 

@@ -1,4 +1,4 @@
-import { PubSub } from 'graphql-subscriptions';
+import { PubSub, withFilter } from 'graphql-subscriptions';
 import List from '../models/list';
 import Card from '../models/card';
 import Board from '../models/board';
@@ -75,6 +75,7 @@ const resolvers = {
       await member.save();
 
       const boards = await getMyBoards(_, name, ctx);
+
       pubsub.publish('BOARD_LIST_UPDATED', { newBoardList: boards });
       return board;
     },
@@ -340,12 +341,31 @@ const resolvers = {
     },
   },
   Subscription: {
+    newBoardList: {
+      subscribe: withFilter(
+        () => pubsub.asyncIterator('BOARD_LIST_UPDATED'),
+        (payload, variables) => {
+          //O(n^2) lmao
+          //perhaps this subscriptions returns a single Board and on the front the cache is updated based on the board returned?
+          //that would require a different subscription though for delete, update and add...
+          for (const x of payload.newBoardList) {
+            for (const y of x.members) {
+              if (y.idMember.toString() === variables.memberId) return true;
+            }
+          }
+          return false;
+        },
+      ),
+    },
     newBoard: {
       subscribe: () => pubsub.asyncIterator(['BOARD_UPDATED']),
     },
-    newBoardList: {
-      subscribe: () => pubsub.asyncIterator(['BOARD_LIST_UPDATED']),
-    },
+    // newBoard: {
+    //   subscribe: () => pubsub.asyncIterator(['BOARD_UPDATED']),
+    // },
+    // newBoardList: {
+    //   subscribe: () => pubsub.asyncIterator(['BOARD_LIST_UPDATED']),
+    // },
   },
 };
 

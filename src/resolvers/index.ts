@@ -381,8 +381,13 @@ const resolvers = {
     boardDeleted: {
       subscribe: withFilter(
         () => pubsub.asyncIterator('BOARD_DELETED'),
-        (payload, variables, ctx) => {
-          return true;
+        (payload, variables) => {
+          for (const id of variables.idBoards) {
+            if (payload.boardDeleted === id) {
+              return true;
+            }
+          }
+          return false;
         },
       ),
     },

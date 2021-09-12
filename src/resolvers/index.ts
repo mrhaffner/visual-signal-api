@@ -124,11 +124,10 @@ const resolvers = {
         await Board.findOneAndRemove({
           _id,
         });
-        pubsub.publish('BOARD_UPDATED', { newBoard: [] });
-        const boards = await getMyBoards(_, _id, ctx);
-        pubsub.publish('BOARD_LIST_UPDATED', { newBoardList: boards });
-        console.log(_id);
-
+        // pubsub.publish('BOARD_UPDATED', { newBoard: [] });
+        // const boards = await getMyBoards(_, _id, ctx);
+        // pubsub.publish('BOARD_LIST_UPDATED', { newBoardList: boards });
+        pubsub.publish('BOARD_DELETED', { boardDeleted: _id });
         return _id;
       } catch (e) {
         console.log(e);
@@ -345,7 +344,7 @@ const resolvers = {
     newBoardList: {
       subscribe: withFilter(
         () => pubsub.asyncIterator('BOARD_LIST_UPDATED'),
-        (payload, variables) => {
+        (payload, variables, ctx) => {
           // console.log(payload, variables);
 
           //O(n^2) lmao
@@ -376,6 +375,14 @@ const resolvers = {
           } catch (e) {
             console.log(e);
           }
+        },
+      ),
+    },
+    boardDeleted: {
+      subscribe: withFilter(
+        () => pubsub.asyncIterator('BOARD_DELETED'),
+        (payload, variables, ctx) => {
+          return true;
         },
       ),
     },

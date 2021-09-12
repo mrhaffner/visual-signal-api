@@ -11,7 +11,6 @@ const context = async ({ req }: any) => {
 
   if (auth && auth.toLowerCase().startsWith('bearer ')) {
     const decodedToken = jwt.verify(auth.substring(7), JWT_SECRET);
-
     //@ts-ignore
     const currentMember = await Member.findById(decodedToken.id);
     return { currentMember };

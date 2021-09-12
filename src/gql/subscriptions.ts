@@ -4,6 +4,7 @@ const subscriptionTypeDefs = gql`
   type Subscription {
     newBoard(idBoard: ID!): [Board]
     newBoardList(memberId: ID!): [Board]
+    boardDeleted: ID
   }
 `;
 

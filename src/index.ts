@@ -9,12 +9,6 @@ import typeDefs from './gql';
 import resolvers from './resolvers';
 import context from './context';
 import onConnect from './onConnect';
-import jwt from 'jsonwebtoken';
-import Member from './models/member';
-import dotenv from 'dotenv';
-
-dotenv.config();
-const JWT_SECRET = process.env.JWT_SECRET;
 
 (async () => {
   const PORT = 8080;

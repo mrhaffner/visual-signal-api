@@ -344,10 +344,8 @@ const resolvers = {
     newBoardList: {
       subscribe: withFilter(
         () => pubsub.asyncIterator('BOARD_LIST_UPDATED'),
-        (payload, variables, ctx) => {
-          // console.log(payload, variables);
-
-          //O(n^2) lmao
+        (payload, variables) => {
+          //O(n**2) lmao
           //perhaps this subscriptions returns a single Board and on the front the cache is updated based on the board returned?
           //that would require a different subscription though for delete, update and add...
           try {
@@ -367,7 +365,6 @@ const resolvers = {
       subscribe: withFilter(
         () => pubsub.asyncIterator('BOARD_UPDATED'),
         (payload, variables, ctx) => {
-          // console.log(payload, variables);
           console.log(ctx);
 
           try {

@@ -10,10 +10,15 @@ const context = async ({ req }: any) => {
   const auth = req ? req.headers.authorization : null;
 
   if (auth && auth.toLowerCase().startsWith('bearer ')) {
+    // try {
     const decodedToken = jwt.verify(auth.substring(7), JWT_SECRET);
+
     //@ts-ignore
     const currentMember = await Member.findById(decodedToken.id);
     return { currentMember };
+    // } catch (e) {
+    //   console.log(e);
+    // }
   }
 };
 

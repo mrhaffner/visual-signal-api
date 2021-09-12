@@ -7,14 +7,18 @@ const JWT_SECRET = process.env.JWT_SECRET;
 
 const onConnect = async (params: any, webSocket: any) => {
   if (params.authorization) {
-    const decodedToken = jwt.verify(
-      params.authorization.substring(7),
-      JWT_SECRET,
-    );
-    //@ts-ignore
-    const currentMember = await Member.findById(decodedToken.id);
+    try {
+      const decodedToken = jwt.verify(
+        params.authorization.substring(7),
+        JWT_SECRET,
+      );
+      //@ts-ignore
+      const currentMember = await Member.findById(decodedToken.id);
 
-    return { currentMember };
+      return { currentMember };
+    } catch (e) {
+      console.log(e);
+    }
   }
 };
 

@@ -62,7 +62,17 @@ const resolvers = {
       } ////work here
       const idMemberCreator = ctx.currentMember._id;
       //create new doc then save?
-      const members = [{ idMember: idMemberCreator, memberType: 'owner' }];
+      const members = [
+        {
+          idMember: idMemberCreator,
+          memberType: 'owner',
+          fullName: ctx.currentMember.fullName,
+          username: ctx.currentMember.username,
+          initials: ctx.currentMember.initials,
+        },
+      ];
+
+      console.log(members);
       const board = await Board.create({
         name,
         idMemberCreator,

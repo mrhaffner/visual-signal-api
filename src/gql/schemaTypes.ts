@@ -10,6 +10,9 @@ const schemaTypes = gql`
   type MemberInfo {
     idMember: ID!
     memberType: MemberType!
+    fullName: String!
+    username: String!
+    initials: String!
   }
 
   type Board {

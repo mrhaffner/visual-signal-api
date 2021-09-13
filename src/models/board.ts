@@ -9,6 +9,9 @@ const memberInfo = new Schema({
   },
   //unconfirmed?
   //deactivated?
+  fullName: { type: String, required: true },
+  username: { type: String, required: true },
+  initials: { type: String, required: true },
 });
 
 const boardSchema = new Schema({

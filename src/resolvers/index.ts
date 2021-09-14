@@ -72,7 +72,6 @@ const resolvers = {
         },
       ];
 
-      console.log(members);
       const board = await Board.create({
         name,
         idMemberCreator,
@@ -297,6 +296,39 @@ const resolvers = {
         value: jwt.sign(memberForToken, JWT_SECRET, { expiresIn: '1h' }),
       };
     },
+    inviteMember: async (_: any, { input }: any) => {
+      //should check if member already has board/board already has member
+      try {
+        const { email, boardId } = input;
+        const member = await Member.findOne({ email });
+        //@ts-ignore
+        if (member.idBoards.includes(boardId)) {
+          throw new UserInputError('Member already belongs to this board!');
+        }
+        //@ts-ignore
+        member.idBoards.push(boardId);
+        await member.save();
+        //@ts-ignore
+        const board = await Board.findById(boardId);
+
+        const memberObject = {
+          idMember: member._id,
+          memberType: 'normal',
+          //@ts-ignore
+          fullName: member.fullName,
+          //@ts-ignore
+          username: member.username,
+          //@ts-ignore
+          initials: member.initials,
+        };
+        //@ts-ignore
+        board.members.push(memberObject);
+        await board.save();
+        return member;
+      } catch (e) {
+        console.log(e);
+      }
+    },
     updateMemberBoards: async (_: any, { input }: any) => {
       const { _id, boards } = input;
       //change to single board and handle updated array here
@@ -375,8 +407,6 @@ const resolvers = {
       subscribe: withFilter(
         () => pubsub.asyncIterator('BOARD_UPDATED'),
         (payload, variables, ctx) => {
-          console.log(ctx);
-
           try {
             return payload.newBoard[0]._id.toString() === variables.idBoard;
           } catch (e) {

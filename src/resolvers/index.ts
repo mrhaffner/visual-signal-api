@@ -296,10 +296,13 @@ const resolvers = {
         value: jwt.sign(memberForToken, JWT_SECRET, { expiresIn: '1h' }),
       };
     },
-    inviteMember: async (_: any, { input }: any) => {
+    inviteMember: async (_: any, { input }: any, ctx: any) => {
       //should check if member already has board/board already has member
+      const { email, boardId } = input;
+      if (!ctx.currentMember || !ctx.currentMember.idBoards.includes(boardId)) {
+        throw new AuthenticationError('Not authenticated or authorized');
+      }
       try {
-        const { email, boardId } = input;
         const member = await Member.findOne({ email });
         //@ts-ignore
         if (member.idBoards.includes(boardId)) {

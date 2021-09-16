@@ -65,7 +65,7 @@ const resolvers = {
       const members = [
         {
           idMember: idMemberCreator,
-          memberType: 'owner',
+          memberType: 'admin',
           fullName: ctx.currentMember.fullName,
           username: ctx.currentMember.username,
           initials: ctx.currentMember.initials,
@@ -328,6 +328,68 @@ const resolvers = {
         board.members.push(memberObject);
         await board.save();
         return member;
+      } catch (e) {
+        console.log(e);
+      }
+    },
+    removeMemberFromBoard: async (_: any, { input }: any, ctx: any) => {
+      const { memberId, boardId } = input;
+
+      if (!ctx.currentMember || !ctx.currentMember.idBoards.includes(boardId)) {
+        throw new AuthenticationError('Not authenticated or authorized');
+      }
+      //do checks on number of members/admins here? or maybe after getting board
+      try {
+        const board = await Board.findById(boardId);
+
+        //ensure a normal user can only leave a board, not remove another user
+        //@ts-ignore
+        const myMemberLevel = board.members.filter(
+          (memObj: any) =>
+            memObj.idMember.toString() === ctx.currentMember._id.toString(),
+        )[0].memberType;
+
+        if (
+          myMemberLevel === 'normal' &&
+          memberId !== ctx.currentMember._id.toString()
+        ) {
+          throw new AuthenticationError('Not authorized');
+        }
+
+        //cannot remove yourself if only admin
+        const reducer = (prev: any, curr: any) =>
+          prev + curr.memberType === 'normal' ? 0 : 1;
+
+        //@ts-ignore
+        const adminCount = board.members.reduce(reducer, 0);
+        //needs to change
+        if (
+          ctx.currentMember._id.toString() === memberId &&
+          myMemberLevel === 'admin' &&
+          adminCount === 1
+        ) {
+          throw new AuthenticationError('Not authorized');
+        }
+
+        //cannot leave a board if there is only 1 user
+        //@ts-ignore
+        if (board.members.length === 1) {
+          throw new AuthenticationError('Not authorized');
+        }
+        //@ts-ignore
+        board.members = board.members.filter(
+          (memObj: any) => memObj.idMember.toString() !== memberId,
+        );
+        await board.save();
+
+        const member = await Member.findById(memberId);
+        //@ts-ignore
+        member.idBoards = member.idBoards.filter(
+          (idBoard: any) => idBoard.toString() !== boardId,
+        );
+        await member.save();
+
+        return memberId;
       } catch (e) {
         console.log(e);
       }

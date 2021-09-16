@@ -15,6 +15,7 @@ const mutationTypeDefs = gql`
     deleteCard(input: DeleteCard!): ID
     createMember(input: CreateMember!): Token
     inviteMember(input: InviteMemberInput!): Member
+    removeMemberFromBoard(input: RemoveMemberInput!): ID
     updateMemberBoards(input: UpdateMemberBoardInput!): Member
     updateMemberPassword(input: UpdateMemberPasswordInput!): Member
     deleteMember(_id: ID!): ID
@@ -98,6 +99,11 @@ const mutationTypeDefs = gql`
   input LoginInput {
     email: String!
     password: String!
+  }
+
+  input RemoveMemberInput {
+    memberId: ID!
+    boardId: ID!
   }
 `;
 

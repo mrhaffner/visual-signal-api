@@ -5,7 +5,7 @@ const memberInfo = new Schema({
   memberType: {
     type: String,
     default: 'normal',
-    enum: ['normal', 'admin', 'owner'],
+    enum: ['normal', 'admin'],
   },
   //unconfirmed?
   //deactivated?

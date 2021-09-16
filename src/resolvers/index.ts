@@ -4,7 +4,11 @@ import Card from '../models/card';
 import Board from '../models/board';
 import Member from '../models/member';
 import { getBoardById, getMyBoards } from './controllers';
-import { AuthenticationError, UserInputError } from 'apollo-server-errors';
+import {
+  AuthenticationError,
+  UserInputError,
+  ValidationError,
+} from 'apollo-server-errors';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import dotenv from 'dotenv';
@@ -112,7 +116,9 @@ const resolvers = {
         throw new AuthenticationError('Not authenticated or authorized');
       }
       try {
-        //do I need to populate subdoc?
+        ////
+        //only admin can delete board???
+        ////
         const board = await Board.findById(_id);
         // @ts-ignore comment
         const boardMembers = board.members;
@@ -327,6 +333,11 @@ const resolvers = {
         //@ts-ignore
         board.members.push(memberObject);
         await board.save();
+
+        ////
+        //add subscriptions
+        /////
+
         return member;
       } catch (e) {
         console.log(e);
@@ -340,6 +351,9 @@ const resolvers = {
       }
       //do checks on number of members/admins here? or maybe after getting board
       try {
+        /////
+        //this is duplicated code in next resolver
+        ////
         const board = await Board.findById(boardId);
 
         //ensure a normal user can only leave a board, not remove another user
@@ -356,13 +370,15 @@ const resolvers = {
           throw new AuthenticationError('Not authorized');
         }
 
-        //cannot remove yourself if only admin
-        const reducer = (prev: any, curr: any) =>
-          prev + curr.memberType === 'normal' ? 0 : 1;
+        /////
+        //duplicated code
+        /////
 
+        //cannot remove yourself if only admin
         //@ts-ignore
-        const adminCount = board.members.reduce(reducer, 0);
-        //needs to change
+        const adminCount = board.members.filter(
+          (obj: any) => obj.memberType === 'admin',
+        ).length;
         if (
           ctx.currentMember._id.toString() === memberId &&
           myMemberLevel === 'admin' &&
@@ -388,6 +404,60 @@ const resolvers = {
           (idBoard: any) => idBoard.toString() !== boardId,
         );
         await member.save();
+
+        ////
+        //call Boards, BoardList, and maybe some new member subscription?
+        /////
+
+        //perhaps change what is returned?
+        return memberId;
+      } catch (e) {
+        console.log(e);
+      }
+    },
+    updateMemberLevelBoard: async (_: any, { input }: any, ctx: any) => {
+      const { memberId, boardId, newMemberLevel } = input;
+
+      if (!ctx.currentMember || !ctx.currentMember.idBoards.includes(boardId)) {
+        throw new AuthenticationError('Not authenticated or authorized');
+      }
+
+      if (newMemberLevel !== 'admin' && newMemberLevel !== 'normal') {
+        throw new ValidationError('Invalid user level');
+      }
+
+      try {
+        //need authorization checks
+        const board = await Board.findById(boardId);
+
+        //@ts-ignore
+        const myMemberLevel = board.members.filter(
+          (memObj: any) =>
+            memObj.idMember.toString() === ctx.currentMember._id.toString(),
+        )[0].memberType;
+
+        //can only change if admin
+        if (myMemberLevel !== 'admin') {
+          throw new AuthenticationError('Not authorized');
+        }
+        //can only change an admin to normal if there is another admin === 2
+        //@ts-ignore
+        const adminCount = board.members.filter(
+          (obj: any) => obj.memberType === 'admin',
+        ).length;
+
+        if (adminCount === 1 && newMemberLevel === 'normal') {
+          throw new AuthenticationError('Not authorized');
+        }
+
+        await Board.findOneAndUpdate(
+          { _id: boardId, 'members.idMember': memberId },
+          { 'members.$.memberType': newMemberLevel },
+        );
+
+        ////
+        //call Boards, BoardList, and maybe some new member subscription?
+        /////
 
         return memberId;
       } catch (e) {

@@ -16,6 +16,7 @@ const mutationTypeDefs = gql`
     createMember(input: CreateMember!): Token
     inviteMember(input: InviteMemberInput!): Member
     removeMemberFromBoard(input: RemoveMemberInput!): ID
+    updateMemberLevelBoard(input: UpdateMemberLevelInput!): ID
     updateMemberBoards(input: UpdateMemberBoardInput!): Member
     updateMemberPassword(input: UpdateMemberPasswordInput!): Member
     deleteMember(_id: ID!): ID
@@ -104,6 +105,12 @@ const mutationTypeDefs = gql`
   input RemoveMemberInput {
     memberId: ID!
     boardId: ID!
+  }
+
+  input UpdateMemberLevelInput {
+    memberId: ID!
+    boardId: ID!
+    newMemberLevel: String!
   }
 `;
 

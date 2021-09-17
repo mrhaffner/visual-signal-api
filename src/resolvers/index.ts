@@ -97,7 +97,7 @@ const resolvers = {
       if (!ctx.currentMember || !ctx.currentMember.idBoards.includes(_id)) {
         throw new AuthenticationError('Not authenticated or authorized');
       }
-      await Board.findOneAndUpdate(
+      const newBoard = await Board.findOneAndUpdate(
         { _id },
         { name },
         {
@@ -105,11 +105,10 @@ const resolvers = {
         },
       );
       //these are repeated make them their own functions or a hook?
-      const board = await getBoardById(_, { _id }, ctx);
-      pubsub.publish('BOARD_UPDATED', { newBoard: board });
+      pubsub.publish('BOARD_UPDATED', { newBoard });
       const boards = await getMyBoards(_, input, ctx);
       pubsub.publish('BOARD_LIST_UPDATED', { newBoardList: boards });
-      return board;
+      return [newBoard];
     },
     deleteBoard: async (_: any, { _id }: any, ctx: any) => {
       if (!ctx.currentMember || !ctx.currentMember.idBoards.includes(_id)) {
@@ -427,7 +426,6 @@ const resolvers = {
       }
 
       try {
-        //need authorization checks
         const board = await Board.findById(boardId);
 
         //@ts-ignore
@@ -450,15 +448,14 @@ const resolvers = {
           throw new AuthenticationError('Not authorized');
         }
 
-        await Board.findOneAndUpdate(
-          { _id: boardId, 'members.idMember': memberId },
-          { 'members.$.memberType': newMemberLevel },
-        );
+        // const newBoard = await Board.findOneAndUpdate(
+        //   { _id: boardId, 'members.idMember': memberId },
+        //   { 'members.$.memberType': newMemberLevel },
+        // );
 
         ////
         //call Boards, BoardList, and maybe some new member subscription?
         /////
-
         return memberId;
       } catch (e) {
         console.log(e);

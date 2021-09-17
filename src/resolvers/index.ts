@@ -86,7 +86,6 @@ const resolvers = {
       // @ts-ignore comment
       member.idBoards.push(board._id);
       await member.save();
-
       const boards = await getMyBoards(_, name, ctx);
 
       pubsub.publish('BOARD_LIST_UPDATED', { newBoardList: boards });
@@ -97,7 +96,7 @@ const resolvers = {
       if (!ctx.currentMember || !ctx.currentMember.idBoards.includes(_id)) {
         throw new AuthenticationError('Not authenticated or authorized');
       }
-      const newBoard = await Board.findOneAndUpdate(
+      await Board.findOneAndUpdate(
         { _id },
         { name },
         {
@@ -105,10 +104,12 @@ const resolvers = {
         },
       );
       //these are repeated make them their own functions or a hook?
-      pubsub.publish('BOARD_UPDATED', { newBoard });
+      const board = await getBoardById(_, { _id }, ctx);
+      pubsub.publish('BOARD_UPDATED', { newBoard: board });
+
       const boards = await getMyBoards(_, input, ctx);
       pubsub.publish('BOARD_LIST_UPDATED', { newBoardList: boards });
-      return [newBoard];
+      return board;
     },
     deleteBoard: async (_: any, { _id }: any, ctx: any) => {
       if (!ctx.currentMember || !ctx.currentMember.idBoards.includes(_id)) {
@@ -448,17 +449,16 @@ const resolvers = {
           throw new AuthenticationError('Not authorized');
         }
 
-        // const newBoard = await Board.findOneAndUpdate(
-        //   { _id: boardId, 'members.idMember': memberId },
-        //   { 'members.$.memberType': newMemberLevel },
-        // );
+        await Board.findOneAndUpdate(
+          { _id: boardId, 'members.idMember': memberId },
+          { 'members.$.memberType': newMemberLevel },
+        );
+        const newBoard = await getBoardById(_, { _id: boardId }, ctx);
+        pubsub.publish('BOARD_UPDATED', { newBoard });
 
-        ////
-        //call Boards, BoardList, and maybe some new member subscription?
-        /////
         return memberId;
       } catch (e) {
-        console.log(e);
+        console.log('error', e);
       }
     },
     updateMemberBoards: async (_: any, { input }: any) => {

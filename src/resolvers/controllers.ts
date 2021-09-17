@@ -4,14 +4,11 @@ import Member from '../models/member';
 import { AuthenticationError } from 'apollo-server-errors';
 const ObjectId = mongoose.Types.ObjectId;
 
-export const getBoardById = async (
-  _: any,
-  { _id }: any,
-  { currentMember }: any,
-) => {
-  if (!currentMember || !currentMember.idBoards.includes(_id)) {
+export const getBoardById = async (_: any, { _id }: any, ctx: any) => {
+  if (!ctx.currentMember || !ctx.currentMember.idBoards.includes(_id)) {
     throw new AuthenticationError('Not authorized to view this content');
   }
+
   const board = await Board.aggregate([
     {
       $match: { _id: ObjectId(_id) },

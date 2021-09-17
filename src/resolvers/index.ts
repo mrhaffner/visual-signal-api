@@ -334,9 +334,12 @@ const resolvers = {
         board.members.push(memberObject);
         await board.save();
 
-        ////
-        //add subscriptions
-        /////
+        const newBoard = await getBoardById(_, { _id: boardId }, ctx);
+        pubsub.publish('BOARD_UPDATED', { newBoard });
+        const boards = await getMyBoards(_, input, ctx);
+        pubsub.publish('BOARD_LIST_UPDATED', {
+          newBoardList: boards,
+        });
 
         return member;
       } catch (e) {

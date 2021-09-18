@@ -541,10 +541,11 @@ const resolvers = {
     boardUpdated: {
       subscribe: withFilter(
         () => pubsub.asyncIterator('BOARD_UPDATED'),
-        (payload, _, ctx) => {
+        async (payload, _, ctx) => {
           try {
-            for (const x of ctx.currentMember.idBoards) {
-              if (x.toString() === payload.boardUpdated[0]._id.toString())
+            const boards = await getMyBoards(null, null, ctx);
+            for (const x of boards) {
+              if (x._id.toString() === payload.boardUpdated[0]._id.toString())
                 return true;
             }
             return false;
@@ -554,6 +555,23 @@ const resolvers = {
         },
       ),
     },
+    // boardDeleted: {
+    //   subscribe: withFilter(
+    //     () => pubsub.asyncIterator('BOARD_DELETED'),
+    //     (payload, _, ctx) => {
+    //       try {
+    //         console.log(ctx.currentMember.idBoards, payload.boardDeleted);
+
+    //         for (const x of ctx.currentMember.idBoards) {
+    //           if (x.toString() === payload.boardDeleted.toString()) return true;
+    //         }
+    //         return false;
+    //       } catch (e) {
+    //         console.log(e);
+    //       }
+    //     },
+    //   ),
+    // },
     boardDeleted: {
       subscribe: withFilter(
         () => pubsub.asyncIterator('BOARD_DELETED'),

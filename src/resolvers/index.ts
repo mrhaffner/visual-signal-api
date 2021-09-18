@@ -84,14 +84,19 @@ const resolvers = {
         idMemberCreator,
         members,
       });
-      // const member = await Member.findById(idMemberCreator);
-      const member = ctx.currentMember;
+
+      const member = await Member.findById(idMemberCreator);
       // @ts-ignore comment
       member.idBoards.push(board._id);
       await member.save();
-      const boards = await getMyBoards(_, name, ctx);
 
-      pubsub.publish('BOARD_LIST_UPDATED', { newBoardList: boards });
+      const newBoardObj = {
+        memberId: idMemberCreator,
+        boardObj: { name, _id: board._id },
+      };
+
+      pubsub.publish('NEW_BOARD', { newBoard: newBoardObj });
+
       return board;
     },
     updateBoardName: async (_: any, { input }: any, ctx: any) => {
@@ -401,10 +406,13 @@ const resolvers = {
 
         const newBoard = await getBoardById(_, { _id: boardId }, ctx);
         pubsub.publish('BOARD_UPDATED', { boardUpdated: newBoard });
-        const boards = await getMyBoards(_, input, ctx);
-        pubsub.publish('BOARD_LIST_UPDATED', {
-          newBoardList: boards,
-        });
+
+        const newBoardObj = {
+          memberId: member._id,
+          boardObj: { name: newBoard[0].name, _id: newBoard[0]._id },
+        };
+
+        pubsub.publish('NEW_BOARD', { newBoard: newBoardObj });
 
         return member;
       } catch (e) {
@@ -602,25 +610,14 @@ const resolvers = {
     },
   },
   Subscription: {
-    newBoardList: {
+    newBoard: {
       subscribe: withFilter(
-        () => pubsub.asyncIterator('BOARD_LIST_UPDATED'),
-        (payload, variables) => {
-          //O(n**2) lmao
-          //perhaps this subscriptions returns a single Board and on the front the cache is updated based on the board returned?
-          //that would require a different subscription though for delete, update and add...
-
-          try {
-            for (const x of payload.newBoardList) {
-              for (const y of x.members) {
-                if (y.idMember.toString() === variables.memberId) return true;
-              }
-            }
-
-            return false;
-          } catch (e) {
-            console.log(e);
-          }
+        () => pubsub.asyncIterator('NEW_BOARD'),
+        (payload, variables, ctx) => {
+          return (
+            ctx.currentMember._id.toString() ===
+            payload.newBoard.memberId.toString()
+          );
         },
       ),
     },
@@ -641,23 +638,6 @@ const resolvers = {
         },
       ),
     },
-    // boardDeleted: {
-    //   subscribe: withFilter(
-    //     () => pubsub.asyncIterator('BOARD_DELETED'),
-    //     (payload, _, ctx) => {
-    //       try {
-    //         console.log(ctx.currentMember.idBoards, payload.boardDeleted);
-
-    //         for (const x of ctx.currentMember.idBoards) {
-    //           if (x.toString() === payload.boardDeleted.toString()) return true;
-    //         }
-    //         return false;
-    //       } catch (e) {
-    //         console.log(e);
-    //       }
-    //     },
-    //   ),
-    // },
     boardDeleted: {
       subscribe: withFilter(
         () => pubsub.asyncIterator('BOARD_DELETED'),
@@ -682,19 +662,6 @@ const resolvers = {
         },
       ),
     },
-    // removeFromBoard: {
-    //   susbcribe: withFilter(
-    //     () => pubsub.asyncIterator('REMOVED_FROM_BOARD'),
-    //     (payload, variables, ctx) => {
-    //       console.log(payload);
-
-    //       return (
-    //         payload.removeFromBoard.memberId.toString() ===
-    //         ctx.currentMember._id
-    //       );
-    //     },
-    //   ),
-    // },
   },
 };
 

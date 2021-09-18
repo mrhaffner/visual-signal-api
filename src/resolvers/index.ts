@@ -546,10 +546,9 @@ const resolvers = {
         () => pubsub.asyncIterator('BOARD_UPDATED'),
         (payload, _, ctx) => {
           try {
-            for (const x of payload.boardUpdated[0].members) {
-              if (x.idMember.toString() === ctx.currentMember._id.toString()) {
+            for (const x of ctx.currentMember.idBoards) {
+              if (x.toString() === payload.boardUpdated[0]._id.toString())
                 return true;
-              }
             }
             return false;
           } catch (e) {

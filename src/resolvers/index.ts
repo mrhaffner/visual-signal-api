@@ -106,9 +106,6 @@ const resolvers = {
       //these are repeated make them their own functions or a hook?
       const board = await getBoardById(_, { _id }, ctx);
       pubsub.publish('BOARD_UPDATED', { boardUpdated: board });
-
-      const boards = await getMyBoards(_, input, ctx);
-      pubsub.publish('BOARD_LIST_UPDATED', { newBoardList: boards });
       return board;
     },
     deleteBoard: async (_: any, { _id }: any, ctx: any) => {

@@ -1,11 +1,19 @@
 import Board from '../models/board';
 import mongoose from 'mongoose';
 import Member from '../models/member';
+import me from './me';
+
 import { AuthenticationError } from 'apollo-server-errors';
 const ObjectId = mongoose.Types.ObjectId;
 
 export const getBoardById = async (_: any, { _id }: any, ctx: any) => {
-  if (!ctx.currentMember || !ctx.currentMember.idBoards.includes(_id)) {
+  if (!ctx.currentMember) {
+    throw new AuthenticationError('Not authenticated');
+  }
+
+  const myMemberInfo = await me(ctx.currentMember._id);
+  //@ts-ignore
+  if (!myMemberInfo.idBoards.includes(_id)) {
     throw new AuthenticationError('Not authorized to view this content');
   }
 

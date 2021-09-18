@@ -12,6 +12,7 @@ import {
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import dotenv from 'dotenv';
+import me from './me';
 
 dotenv.config();
 const pubsub = new PubSub();
@@ -48,9 +49,10 @@ const resolvers = {
     getCardById: async (_: any, { _id }: any) => {
       return await Card.findOne({ _id });
     }, //for testing now, but may be used later
-    getMyMemberInfo: async (_: any, __: any, ctx: any) => {
+    getMyMemberInfo: async (_: any, __: any, { currentMember }: any) => {
       //make this so it only returs the needed fields, definitely not password
-      return ctx.currentMember;
+      // return ctx.currentMember;
+      return await me(currentMember._id);
     },
     getAllMembers: async () => {
       return await Member.find();
@@ -93,9 +95,16 @@ const resolvers = {
     },
     updateBoardName: async (_: any, { input }: any, ctx: any) => {
       const { _id, name } = input;
-      if (!ctx.currentMember || !ctx.currentMember.idBoards.includes(_id)) {
-        throw new AuthenticationError('Not authenticated or authorized');
+      if (!ctx.currentMember) {
+        throw new AuthenticationError('Not authenticated');
       }
+
+      const myMemberInfo = await me(ctx.currentMember._id);
+      //@ts-ignore
+      if (!myMemberInfo.idBoards.includes(_id)) {
+        throw new AuthenticationError('Not authorized to view this content');
+      }
+
       await Board.findOneAndUpdate(
         { _id },
         { name },
@@ -109,8 +118,14 @@ const resolvers = {
       return board;
     },
     deleteBoard: async (_: any, { _id }: any, ctx: any) => {
-      if (!ctx.currentMember || !ctx.currentMember.idBoards.includes(_id)) {
-        throw new AuthenticationError('Not authenticated or authorized');
+      if (!ctx.currentMember) {
+        throw new AuthenticationError('Not authenticated');
+      }
+
+      const myMemberInfo = await me(ctx.currentMember._id);
+      //@ts-ignore
+      if (!myMemberInfo.idBoards.includes(_id)) {
+        throw new AuthenticationError('Not authorized to view this content');
       }
       try {
         ////
@@ -146,8 +161,14 @@ const resolvers = {
     },
     createList: async (_: any, { input }: any, ctx: any) => {
       const { name, pos, idBoard } = input;
-      if (!ctx.currentMember || !ctx.currentMember.idBoards.includes(idBoard)) {
-        throw new AuthenticationError('Not authenticated or authorized');
+      if (!ctx.currentMember) {
+        throw new AuthenticationError('Not authenticated');
+      }
+
+      const myMemberInfo = await me(ctx.currentMember._id);
+      //@ts-ignore
+      if (!myMemberInfo.idBoards.includes(idBoard)) {
+        throw new AuthenticationError('Not authorized to view this content');
       }
       const list = await List.create({ name, pos, idBoard });
 
@@ -158,8 +179,14 @@ const resolvers = {
     },
     updateListName: async (_: any, { input }: any, ctx: any) => {
       const { _id, name, idBoard } = input;
-      if (!ctx.currentMember || !ctx.currentMember.idBoards.includes(idBoard)) {
-        throw new AuthenticationError('Not authenticated or authorized');
+      if (!ctx.currentMember) {
+        throw new AuthenticationError('Not authenticated');
+      }
+
+      const myMemberInfo = await me(ctx.currentMember._id);
+      //@ts-ignore
+      if (!myMemberInfo.idBoards.includes(idBoard)) {
+        throw new AuthenticationError('Not authorized to view this content');
       }
       const list = await List.findOneAndUpdate(
         { _id },
@@ -176,8 +203,14 @@ const resolvers = {
     },
     updateListPos: async (_: any, { input }: any, ctx: any) => {
       const { _id, pos, idBoard } = input;
-      if (!ctx.currentMember || !ctx.currentMember.idBoards.includes(idBoard)) {
-        throw new AuthenticationError('Not authenticated or authorized');
+      if (!ctx.currentMember) {
+        throw new AuthenticationError('Not authenticated');
+      }
+
+      const myMemberInfo = await me(ctx.currentMember._id);
+      //@ts-ignore
+      if (!myMemberInfo.idBoards.includes(idBoard)) {
+        throw new AuthenticationError('Not authorized to view this content');
       }
       const list = await List.findOneAndUpdate(
         { _id },
@@ -194,8 +227,14 @@ const resolvers = {
     },
     deleteList: async (_: any, { input }: any, ctx: any) => {
       const { _id, idBoard } = input;
-      if (!ctx.currentMember || !ctx.currentMember.idBoards.includes(idBoard)) {
-        throw new AuthenticationError('Not authenticated or authorized');
+      if (!ctx.currentMember) {
+        throw new AuthenticationError('Not authenticated');
+      }
+
+      const myMemberInfo = await me(ctx.currentMember._id);
+      //@ts-ignore
+      if (!myMemberInfo.idBoards.includes(idBoard)) {
+        throw new AuthenticationError('Not authorized to view this content');
       }
       try {
         await List.findOneAndRemove({
@@ -213,8 +252,14 @@ const resolvers = {
     },
     createCard: async (_: any, { input }: any, ctx: any) => {
       const { name, pos, idList, idBoard } = input;
-      if (!ctx.currentMember || !ctx.currentMember.idBoards.includes(idBoard)) {
-        throw new AuthenticationError('Not authenticated or authorized');
+      if (!ctx.currentMember) {
+        throw new AuthenticationError('Not authenticated');
+      }
+
+      const myMemberInfo = await me(ctx.currentMember._id);
+      //@ts-ignore
+      if (!myMemberInfo.idBoards.includes(idBoard)) {
+        throw new AuthenticationError('Not authorized to view this content');
       }
       const card = await Card.create({ name, pos, idList });
 
@@ -225,8 +270,14 @@ const resolvers = {
     },
     updateCardName: async (_: any, { input }: any, ctx: any) => {
       const { _id, name, idBoard } = input;
-      if (!ctx.currentMember || !ctx.currentMember.idBoards.includes(idBoard)) {
-        throw new AuthenticationError('Not authenticated or authorized');
+      if (!ctx.currentMember) {
+        throw new AuthenticationError('Not authenticated');
+      }
+
+      const myMemberInfo = await me(ctx.currentMember._id);
+      //@ts-ignore
+      if (!myMemberInfo.idBoards.includes(idBoard)) {
+        throw new AuthenticationError('Not authorized to view this content');
       }
       const card = await Card.findOneAndUpdate(
         { _id },
@@ -241,8 +292,14 @@ const resolvers = {
     },
     updateCardPos: async (_: any, { input }: any, ctx: any) => {
       const { _id, pos, idList, idBoard } = input;
-      if (!ctx.currentMember || !ctx.currentMember.idBoards.includes(idBoard)) {
-        throw new AuthenticationError('Not authenticated or authorized');
+      if (!ctx.currentMember) {
+        throw new AuthenticationError('Not authenticated');
+      }
+
+      const myMemberInfo = await me(ctx.currentMember._id);
+      //@ts-ignore
+      if (!myMemberInfo.idBoards.includes(idBoard)) {
+        throw new AuthenticationError('Not authorized to view this content');
       }
       const updateObject = { pos };
       // @ts-ignore comment
@@ -264,8 +321,14 @@ const resolvers = {
     },
     deleteCard: async (_: any, { input }: any, ctx: any) => {
       const { _id, idBoard } = input;
-      if (!ctx.currentMember || !ctx.currentMember.idBoards.includes(idBoard)) {
-        throw new AuthenticationError('Not authenticated or authorized');
+      if (!ctx.currentMember) {
+        throw new AuthenticationError('Not authenticated');
+      }
+
+      const myMemberInfo = await me(ctx.currentMember._id);
+      //@ts-ignore
+      if (!myMemberInfo.idBoards.includes(idBoard)) {
+        throw new AuthenticationError('Not authorized to view this content');
       }
       await Card.findOneAndRemove({
         _id,
@@ -300,8 +363,14 @@ const resolvers = {
     inviteMember: async (_: any, { input }: any, ctx: any) => {
       //should check if member already has board/board already has member
       const { email, boardId } = input;
-      if (!ctx.currentMember || !ctx.currentMember.idBoards.includes(boardId)) {
-        throw new AuthenticationError('Not authenticated or authorized');
+      if (!ctx.currentMember) {
+        throw new AuthenticationError('Not authenticated');
+      }
+
+      const myMemberInfo = await me(ctx.currentMember._id);
+      //@ts-ignore
+      if (!myMemberInfo.idBoards.includes(boardId)) {
+        throw new AuthenticationError('Not authorized to view this content');
       }
       try {
         const member = await Member.findOne({ email });
@@ -344,8 +413,14 @@ const resolvers = {
     removeMemberFromBoard: async (_: any, { input }: any, ctx: any) => {
       const { memberId, boardId } = input;
 
-      if (!ctx.currentMember || !ctx.currentMember.idBoards.includes(boardId)) {
-        throw new AuthenticationError('Not authenticated or authorized');
+      if (!ctx.currentMember) {
+        throw new AuthenticationError('Not authenticated');
+      }
+
+      const myMemberInfo = await me(ctx.currentMember._id);
+      //@ts-ignore
+      if (!myMemberInfo.idBoards.includes(boardId)) {
+        throw new AuthenticationError('Not authorized to view this content');
       }
       //do checks on number of members/admins here? or maybe after getting board
       try {
@@ -419,8 +494,14 @@ const resolvers = {
     updateMemberLevelBoard: async (_: any, { input }: any, ctx: any) => {
       const { memberId, boardId, newMemberLevel } = input;
 
-      if (!ctx.currentMember || !ctx.currentMember.idBoards.includes(boardId)) {
-        throw new AuthenticationError('Not authenticated or authorized');
+      if (!ctx.currentMember) {
+        throw new AuthenticationError('Not authenticated');
+      }
+
+      const myMemberInfo = await me(ctx.currentMember._id);
+      //@ts-ignore
+      if (!myMemberInfo.idBoards.includes(boardId)) {
+        throw new AuthenticationError('Not authorized to view this content');
       }
 
       if (newMemberLevel !== 'admin' && newMemberLevel !== 'normal') {

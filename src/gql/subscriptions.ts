@@ -5,6 +5,12 @@ const subscriptionTypeDefs = gql`
     boardUpdated: [Board]
     newBoardList(memberId: ID!): [Board]
     boardDeleted(idBoards: [ID!]!): ID
+    removeFromBoard: RemoveMemberObject
+  }
+
+  type RemoveMemberObject {
+    memberId: ID!
+    boardId: ID!
   }
 `;
 

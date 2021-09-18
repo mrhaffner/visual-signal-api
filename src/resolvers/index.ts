@@ -13,6 +13,7 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import dotenv from 'dotenv';
 import me from './me';
+import getAggBoard from './getAggBoard';
 
 dotenv.config();
 const pubsub = new PubSub();
@@ -469,6 +470,7 @@ const resolvers = {
         board.members = board.members.filter(
           (memObj: any) => memObj.idMember.toString() !== memberId,
         );
+
         await board.save();
 
         const member = await Member.findById(memberId);
@@ -476,14 +478,17 @@ const resolvers = {
         member.idBoards = member.idBoards.filter(
           (idBoard: any) => idBoard.toString() !== boardId,
         );
-        await member.save();
 
-        const newBoard = await getBoardById(_, { _id: boardId }, ctx);
+        await member.save();
+        const removeObj = { memberId, boardId };
+
+        pubsub.publish('REMOVED_FROM_BOARD', { removeFromBoard: removeObj });
+        const newBoard = await getAggBoard(boardId);
         pubsub.publish('BOARD_UPDATED', { boardUpdated: newBoard });
-        const boards = await getMyBoards(_, input, ctx);
-        pubsub.publish('BOARD_LIST_UPDATED', {
-          newBoardList: boards,
-        });
+        // const boards = await getMyBoards(_, input, ctx);
+        // pubsub.publish('BOARD_LIST_UPDATED', {
+        //   newBoardList: boards,
+        // });
 
         //perhaps change what is returned?
         return memberId;
@@ -666,6 +671,30 @@ const resolvers = {
         },
       ),
     },
+    removeFromBoard: {
+      subscribe: withFilter(
+        () => pubsub.asyncIterator('REMOVED_FROM_BOARD'),
+        (payload, variables, ctx) => {
+          return (
+            payload.removeFromBoard.memberId.toString() ===
+            ctx.currentMember._id.toString()
+          );
+        },
+      ),
+    },
+    // removeFromBoard: {
+    //   susbcribe: withFilter(
+    //     () => pubsub.asyncIterator('REMOVED_FROM_BOARD'),
+    //     (payload, variables, ctx) => {
+    //       console.log(payload);
+
+    //       return (
+    //         payload.removeFromBoard.memberId.toString() ===
+    //         ctx.currentMember._id
+    //       );
+    //     },
+    //   ),
+    // },
   },
 };
 

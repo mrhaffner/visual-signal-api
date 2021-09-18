@@ -1,10 +1,8 @@
 import Board from '../models/board';
-import mongoose from 'mongoose';
 import Member from '../models/member';
 import me from './me';
-
 import { AuthenticationError } from 'apollo-server-errors';
-const ObjectId = mongoose.Types.ObjectId;
+import getAggBoard from './getAggBoard';
 
 export const getBoardById = async (_: any, { _id }: any, ctx: any) => {
   if (!ctx.currentMember) {
@@ -17,37 +15,7 @@ export const getBoardById = async (_: any, { _id }: any, ctx: any) => {
     throw new AuthenticationError('Not authorized to view this content');
   }
 
-  const board = await Board.aggregate([
-    {
-      $match: { _id: ObjectId(_id) },
-    },
-    {
-      $lookup: {
-        from: 'lists',
-        let: { idBoard: '$_id' },
-        pipeline: [
-          { $match: { $expr: { $eq: ['$idBoard', '$$idBoard'] } } },
-          {
-            $sort: { pos: 1 },
-          },
-          {
-            $lookup: {
-              from: 'cards',
-              let: { idList: '$_id' },
-              pipeline: [
-                { $match: { $expr: { $eq: ['$idList', '$$idList'] } } },
-                {
-                  $sort: { pos: 1 },
-                },
-              ],
-              as: 'cards',
-            },
-          },
-        ],
-        as: 'lists',
-      },
-    },
-  ]);
+  const board = await getAggBoard(_id);
   return board; //board[0]
 };
 

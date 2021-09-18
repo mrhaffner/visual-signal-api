@@ -105,7 +105,7 @@ const resolvers = {
       );
       //these are repeated make them their own functions or a hook?
       const board = await getBoardById(_, { _id }, ctx);
-      pubsub.publish('BOARD_UPDATED', { newBoard: board });
+      pubsub.publish('BOARD_UPDATED', { boardUpdated: board });
 
       const boards = await getMyBoards(_, input, ctx);
       pubsub.publish('BOARD_LIST_UPDATED', { newBoardList: boards });
@@ -139,9 +139,7 @@ const resolvers = {
         await Board.findOneAndRemove({
           _id,
         });
-        // pubsub.publish('BOARD_UPDATED', { newBoard: [] });
-        // const boards = await getMyBoards(_, _id, ctx);
-        // pubsub.publish('BOARD_LIST_UPDATED', { newBoardList: boards });
+
         pubsub.publish('BOARD_DELETED', { boardDeleted: _id });
         return _id;
       } catch (e) {
@@ -157,7 +155,7 @@ const resolvers = {
       const list = await List.create({ name, pos, idBoard });
 
       const board = await getBoardById(_, { _id: idBoard }, ctx);
-      pubsub.publish('BOARD_UPDATED', { newBoard: board });
+      pubsub.publish('BOARD_UPDATED', { boardUpdated: board });
 
       return list;
     },
@@ -176,7 +174,7 @@ const resolvers = {
 
       const board = await getBoardById(_, { _id: idBoard }, ctx);
 
-      pubsub.publish('BOARD_UPDATED', { newBoard: board });
+      pubsub.publish('BOARD_UPDATED', { boardUpdated: board });
       return list;
     },
     updateListPos: async (_: any, { input }: any, ctx: any) => {
@@ -193,7 +191,7 @@ const resolvers = {
       );
 
       const board = await getBoardById(_, { _id: idBoard }, ctx);
-      pubsub.publish('BOARD_UPDATED', { newBoard: board });
+      pubsub.publish('BOARD_UPDATED', { boardUpdated: board });
 
       return list;
     },
@@ -208,7 +206,7 @@ const resolvers = {
         });
 
         const board = await getBoardById(_, { _id: idBoard }, ctx);
-        pubsub.publish('BOARD_UPDATED', { newBoard: board });
+        pubsub.publish('BOARD_UPDATED', { boardUpdated: board });
 
         return _id;
       } catch (e) {
@@ -224,7 +222,7 @@ const resolvers = {
       const card = await Card.create({ name, pos, idList });
 
       const board = await getBoardById(_, { _id: idBoard }, ctx);
-      pubsub.publish('BOARD_UPDATED', { newBoard: board });
+      pubsub.publish('BOARD_UPDATED', { boardUpdated: board });
 
       return card;
     },
@@ -241,7 +239,7 @@ const resolvers = {
         },
       );
       const board = await getBoardById(_, { _id: idBoard }, ctx);
-      pubsub.publish('BOARD_UPDATED', { newBoard: board });
+      pubsub.publish('BOARD_UPDATED', { boardUpdated: board });
       return card;
     },
     updateCardPos: async (_: any, { input }: any, ctx: any) => {
@@ -263,7 +261,7 @@ const resolvers = {
       );
 
       const board = await getBoardById(_, { _id: idBoard }, ctx);
-      pubsub.publish('BOARD_UPDATED', { newBoard: board });
+      pubsub.publish('BOARD_UPDATED', { boardUpdated: board });
 
       return card;
     },
@@ -277,7 +275,7 @@ const resolvers = {
       });
 
       const board = await getBoardById(_, { _id: idBoard }, ctx);
-      pubsub.publish('BOARD_UPDATED', { newBoard: board });
+      pubsub.publish('BOARD_UPDATED', { boardUpdated: board });
 
       return _id;
     },
@@ -335,7 +333,7 @@ const resolvers = {
         await board.save();
 
         const newBoard = await getBoardById(_, { _id: boardId }, ctx);
-        pubsub.publish('BOARD_UPDATED', { newBoard });
+        pubsub.publish('BOARD_UPDATED', { boardUpdated: newBoard });
         const boards = await getMyBoards(_, input, ctx);
         pubsub.publish('BOARD_LIST_UPDATED', {
           newBoardList: boards,
@@ -408,9 +406,12 @@ const resolvers = {
         );
         await member.save();
 
-        ////
-        //call Boards, BoardList, and maybe some new member subscription?
-        /////
+        const newBoard = await getBoardById(_, { _id: boardId }, ctx);
+        pubsub.publish('BOARD_UPDATED', { boardUpdated: newBoard });
+        const boards = await getMyBoards(_, input, ctx);
+        pubsub.publish('BOARD_LIST_UPDATED', {
+          newBoardList: boards,
+        });
 
         //perhaps change what is returned?
         return memberId;
@@ -457,7 +458,7 @@ const resolvers = {
           { 'members.$.memberType': newMemberLevel },
         );
         const newBoard = await getBoardById(_, { _id: boardId }, ctx);
-        pubsub.publish('BOARD_UPDATED', { newBoard });
+        pubsub.publish('BOARD_UPDATED', { boardUpdated: newBoard });
 
         return memberId;
       } catch (e) {
@@ -525,12 +526,14 @@ const resolvers = {
           //O(n**2) lmao
           //perhaps this subscriptions returns a single Board and on the front the cache is updated based on the board returned?
           //that would require a different subscription though for delete, update and add...
+
           try {
             for (const x of payload.newBoardList) {
               for (const y of x.members) {
                 if (y.idMember.toString() === variables.memberId) return true;
               }
             }
+
             return false;
           } catch (e) {
             console.log(e);
@@ -538,12 +541,17 @@ const resolvers = {
         },
       ),
     },
-    newBoard: {
+    boardUpdated: {
       subscribe: withFilter(
         () => pubsub.asyncIterator('BOARD_UPDATED'),
-        (payload, variables, ctx) => {
+        (payload, _, ctx) => {
           try {
-            return payload.newBoard[0]._id.toString() === variables.idBoard;
+            for (const x of payload.boardUpdated[0].members) {
+              if (x.idMember.toString() === ctx.currentMember._id.toString()) {
+                return true;
+              }
+            }
+            return false;
           } catch (e) {
             console.log(e);
           }

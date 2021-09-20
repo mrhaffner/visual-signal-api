@@ -101,25 +101,6 @@ const resolvers = {
         return null;
       }
     }, //not currently used
-    login: async (_: any, { input }: any) => {
-      const { email, password } = input;
-      const member = await Member.findOne({ email });
-      //@ts-ignore
-      const validPassword = await bcrypt.compare(password, member.password);
-
-      if (!member || !validPassword) {
-        throw new UserInputError('wrong credentials');
-      }
-      const memberForToken = {
-        id: member._id,
-        //@ts-ignore
-        email: member.email,
-      };
-
-      return {
-        value: jwt.sign(memberForToken, JWT_SECRET, { expiresIn: '1h' }),
-      };
-    },
   },
   Subscription: {
     newBoard: {

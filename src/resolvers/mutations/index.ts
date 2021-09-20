@@ -13,6 +13,7 @@ import createMember from './member/createMember';
 import inviteMember from './member/inviteMember';
 import removeMemberFromBoard from './member/removeMemberFromBoard';
 import updateMemberLevelBoard from './member/updateMemberLevelBoard';
+import login from './member/login';
 
 const mutations = {
   createBoard,
@@ -30,6 +31,7 @@ const mutations = {
   inviteMember,
   removeMemberFromBoard,
   updateMemberLevelBoard,
+  login,
 };
 
 export default mutations;

@@ -1,7 +1,11 @@
 import { model, Schema } from 'mongoose';
 
 const memberInfo = new Schema({
-  idMember: { type: Schema.Types.ObjectId, ref: 'member', requied: true },
+  idMember: {
+    type: Schema.Types.ObjectId,
+    ref: 'member',
+    required: true,
+  },
   memberType: {
     type: String,
     default: 'normal',
@@ -15,7 +19,7 @@ const memberInfo = new Schema({
 });
 
 const boardSchema = new Schema({
-  name: { type: String, required: true },
+  name: { type: String, required: true, max: 30 },
   idMemberCreator: {
     type: Schema.Types.ObjectId,
     ref: 'member',

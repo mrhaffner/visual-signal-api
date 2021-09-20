@@ -1,4 +1,5 @@
 import { AuthenticationError } from 'apollo-server-errors';
+import NewBoardRules from '../../validations/board';
 import Board from '../../models/board';
 import Member from '../../models/member';
 import pubsub from '../pubsub';
@@ -8,9 +9,8 @@ const createBoard = async (_: any, { name }: any, ctx: any) => {
     if (!ctx.currentMember) {
       throw new AuthenticationError('Not authenticated');
     }
-    //min length
-    //sanitize
-    //validate
+
+    await NewBoardRules.validateAsync({ name });
 
     const idMemberCreator = ctx.currentMember._id;
     const members = [

@@ -19,6 +19,7 @@
     "express": "^4.17.1",
     "express-mongo-sanitize": "^2.1.0",
     "graphql-subscriptions": "^1.2.1",
+    "joi": "^17.4.2",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.13.3",
     "subscriptions-transport-ws": "^0.9.19"

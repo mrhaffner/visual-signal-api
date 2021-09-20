@@ -1,4 +1,4 @@
-import { PubSub, withFilter } from 'graphql-subscriptions';
+import { withFilter } from 'graphql-subscriptions';
 import List from '../models/list';
 import Card from '../models/card';
 import Board from '../models/board';
@@ -14,7 +14,6 @@ import bcrypt from 'bcrypt';
 import dotenv from 'dotenv';
 import me from './me';
 import getAggBoard from './getAggBoard';
-import { body, validationResult } from 'express-validator';
 import pubsub from './pubsub';
 import createBoard from './mutations/createBoard';
 

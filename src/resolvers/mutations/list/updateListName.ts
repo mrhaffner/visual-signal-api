@@ -1,26 +1,25 @@
-import Board from '../../../models/board';
 import { AuthenticationError } from 'apollo-server-errors';
-import me from '../../me';
-import pubsub from '../../pubsub';
-import getAggBoard from '../../getAggBoard';
 import NewNameRules from '../../../validations/newName';
+import pubsub from '../../pubsub';
+import me from '../../me';
+import List from '../../../models/list';
+import getAggBoard from '../../../resolvers/getAggBoard';
 
-const updateBoardName = async (_: any, { input }: any, ctx: any) => {
+const updateListName = async (_: any, { input }: any, ctx: any) => {
   try {
+    const { _id, name, idBoard } = input;
+    await NewNameRules.validateAsync({ name });
+
     if (!ctx.currentMember) {
       throw new AuthenticationError('Not authenticated');
     }
 
     const myMemberInfo = await me(ctx.currentMember._id);
     //@ts-ignore
-    if (!myMemberInfo.idBoards.includes(_id)) {
+    if (!myMemberInfo.idBoards.includes(idBoard)) {
       throw new AuthenticationError('Not authorized to view this content');
     }
-
-    const { _id, name } = input;
-    await NewNameRules.validateAsync({ name });
-
-    await Board.findOneAndUpdate(
+    const list = await List.findOneAndUpdate(
       { _id },
       { name },
       {
@@ -28,12 +27,14 @@ const updateBoardName = async (_: any, { input }: any, ctx: any) => {
       },
     );
 
-    const board = await getAggBoard(_id);
+    const board = await getAggBoard(idBoard);
+
     pubsub.publish('BOARD_UPDATED', { boardUpdated: board });
-    return board;
+
+    return list;
   } catch (e) {
     console.log(e);
   }
 };
 
-export default updateBoardName;
+export default updateListName;

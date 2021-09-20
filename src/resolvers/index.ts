@@ -68,30 +68,6 @@ const resolvers = {
   },
   Mutation: {
     ...mutations,
-    updateListName: async (_: any, { input }: any, ctx: any) => {
-      const { _id, name, idBoard } = input;
-      if (!ctx.currentMember) {
-        throw new AuthenticationError('Not authenticated');
-      }
-
-      const myMemberInfo = await me(ctx.currentMember._id);
-      //@ts-ignore
-      if (!myMemberInfo.idBoards.includes(idBoard)) {
-        throw new AuthenticationError('Not authorized to view this content');
-      }
-      const list = await List.findOneAndUpdate(
-        { _id },
-        { name },
-        {
-          new: true,
-        },
-      );
-
-      const board = await getBoardById(_, { _id: idBoard }, ctx);
-
-      pubsub.publish('BOARD_UPDATED', { boardUpdated: board });
-      return list;
-    },
     updateListPos: async (_: any, { input }: any, ctx: any) => {
       const { _id, pos, idBoard } = input;
       if (!ctx.currentMember) {

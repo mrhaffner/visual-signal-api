@@ -36,6 +36,7 @@ const schemaTypes = gql`
     name: String!
     pos: Float!
     idList: String!
+    idBoard: String!
   }
 
   type Member {

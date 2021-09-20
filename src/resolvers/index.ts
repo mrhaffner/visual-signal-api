@@ -170,7 +170,7 @@ const resolvers = {
       if (!myMemberInfo.idBoards.includes(idBoard)) {
         throw new AuthenticationError('Not authorized to view this content');
       }
-      const card = await Card.create({ name, pos, idList });
+      const card = await Card.create({ name, pos, idList, idBoard });
 
       const board = await getBoardById(_, { _id: idBoard }, ctx);
       pubsub.publish('BOARD_UPDATED', { boardUpdated: board });

@@ -16,10 +16,6 @@ const deleteBoard = async (_: any, { _id }: any, ctx: any) => {
     if (!myMemberInfo.idBoards.includes(_id)) {
       throw new AuthenticationError('Not authorized to delete board');
     }
-
-    ////
-    //only admin can delete board???
-    ////
     const board = await Board.findById(_id);
 
     const myMemberLevel = getMyMemberLevel(board, ctx.currentMember._id);
@@ -41,6 +37,12 @@ const deleteBoard = async (_: any, { _id }: any, ctx: any) => {
       member.idBoards = newBoards;
       member.save();
     }
+
+    ///
+    ///////
+    ////delete all cards and lists!!!!!/////
+    ////////
+    ////
 
     await Board.findOneAndRemove({
       _id,

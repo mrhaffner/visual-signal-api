@@ -12,13 +12,14 @@ const updateBoardName = async (_: any, { input }: any, ctx: any) => {
     }
 
     const myMemberInfo = await me(ctx.currentMember._id);
+
+    const { _id, name } = input;
+    await NewNameRules.validateAsync({ name });
+
     //@ts-ignore
     if (!myMemberInfo.idBoards.includes(_id)) {
       throw new AuthenticationError('Not authorized to view this content');
     }
-
-    const { _id, name } = input;
-    await NewNameRules.validateAsync({ name });
 
     await Board.findOneAndUpdate(
       { _id },

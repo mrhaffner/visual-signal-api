@@ -15,11 +15,13 @@ import dotenv from 'dotenv';
 import me from './me';
 import getAggBoard from './getAggBoard';
 import pubsub from './pubsub';
-import createBoard from './mutations/createBoard';
+// import createBoard from './mutations/createBoard';
+import mutations from './mutations';
 
 dotenv.config();
 // const pubsub = new PubSub();
 const JWT_SECRET = process.env.JWT_SECRET;
+const { createBoard, updateBoardName } = mutations;
 
 const resolvers = {
   Query: {
@@ -66,30 +68,7 @@ const resolvers = {
   },
   Mutation: {
     createBoard,
-    updateBoardName: async (_: any, { input }: any, ctx: any) => {
-      const { _id, name } = input;
-      if (!ctx.currentMember) {
-        throw new AuthenticationError('Not authenticated');
-      }
-
-      const myMemberInfo = await me(ctx.currentMember._id);
-      //@ts-ignore
-      if (!myMemberInfo.idBoards.includes(_id)) {
-        throw new AuthenticationError('Not authorized to view this content');
-      }
-
-      await Board.findOneAndUpdate(
-        { _id },
-        { name },
-        {
-          new: true,
-        },
-      );
-      //these are repeated make them their own functions or a hook?
-      const board = await getBoardById(_, { _id }, ctx);
-      pubsub.publish('BOARD_UPDATED', { boardUpdated: board });
-      return board;
-    },
+    updateBoardName,
     deleteBoard: async (_: any, { _id }: any, ctx: any) => {
       if (!ctx.currentMember) {
         throw new AuthenticationError('Not authenticated');

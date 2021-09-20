@@ -1,7 +1,7 @@
 import Joi from 'joi';
 
 const NewBoardRules = Joi.object({
-  name: Joi.string().max(30).required(),
+  name: Joi.string().required(),
 });
 
 export default NewBoardRules;

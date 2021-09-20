@@ -1,7 +1,7 @@
-import me from '../me';
+import me from '../helpers/me';
 import { AuthenticationError } from 'apollo-server-errors';
-import getAggBoard from '../getAggBoard';
-import getMyBoardsHelper from '../getMyBoardsHelper';
+import getAggBoard from '../helpers/getAggBoard';
+import getMyBoardsHelper from '../helpers/getMyBoardsHelper';
 
 export const getBoardById = async (_: any, { _id }: any, ctx: any) => {
   try {

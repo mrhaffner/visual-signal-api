@@ -1,6 +1,6 @@
 import { withFilter } from 'graphql-subscriptions';
 import pubsub from '../pubsub';
-import getMyBoardsHelper from '../getMyBoardsHelper';
+import getMyBoardsHelper from '../helpers/getMyBoardsHelper';
 
 const boardUpdated = {
   subscribe: withFilter(

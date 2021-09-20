@@ -1,9 +1,9 @@
 import { AuthenticationError, UserInputError } from 'apollo-server-errors';
 import pubsub from '../../pubsub';
-import me from '../../me';
+import me from '../../helpers/me';
 import Member from '../../../models/member';
 import Board from '../../../models/board';
-import getAggBoard from '../../../resolvers/getAggBoard';
+import getAggBoard from '../../helpers/getAggBoard';
 
 const inviteMember = async (_: any, { input }: any, ctx: any) => {
   try {

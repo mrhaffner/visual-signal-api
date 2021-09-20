@@ -1,4 +1,4 @@
-import me from './../me';
+import me from '../helpers/me';
 
 export const getMyMemberInfo = async (
   _: any,

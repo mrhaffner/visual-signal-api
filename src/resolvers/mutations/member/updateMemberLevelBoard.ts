@@ -1,8 +1,8 @@
 import { AuthenticationError, ValidationError } from 'apollo-server-errors';
 import pubsub from '../../pubsub';
-import me from '../../me';
+import me from '../../helpers/me';
 import Board from '../../../models/board';
-import getAggBoard from '../../../resolvers/getAggBoard';
+import getAggBoard from '../../helpers/getAggBoard';
 
 const updateMemberLevelBoard = async (_: any, { input }: any, ctx: any) => {
   try {

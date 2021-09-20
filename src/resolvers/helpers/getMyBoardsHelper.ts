@@ -1,5 +1,5 @@
-import Board from '../models/board';
-import Member from '../models/member';
+import Board from '../../models/board';
+import Member from '../../models/member';
 
 const getMyBoardsHelper = async (_id: string) => {
   const member = await Member.findOne({ _id });

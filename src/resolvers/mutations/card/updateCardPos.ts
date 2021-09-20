@@ -1,9 +1,9 @@
 import { AuthenticationError } from 'apollo-server-errors';
 import NewPosRules from '../../../validations/newPos';
 import pubsub from '../../pubsub';
-import me from '../../me';
+import me from '../../helpers/me';
 import Card from '../../../models/card';
-import getAggBoard from '../../../resolvers/getAggBoard';
+import getAggBoard from '../../helpers/getAggBoard';
 
 const updateCardPos = async (_: any, { input }: any, ctx: any) => {
   try {

@@ -1,10 +1,10 @@
 import { AuthenticationError } from 'apollo-server-errors';
 import pubsub from '../../pubsub';
-import me from '../../me';
+import me from '../../helpers/me';
 import Member from '../../../models/member';
 import Board from '../../../models/board';
-import getAggBoard from '../../../resolvers/getAggBoard';
-import getMyMemberLevel from '../../../resolvers/getMyMemberLevel';
+import getAggBoard from '../../helpers/getAggBoard';
+import getMyMemberLevel from '../../helpers/getMyMemberLevel';
 
 const removeMemberFromBoard = async (_: any, { input }: any, ctx: any) => {
   try {

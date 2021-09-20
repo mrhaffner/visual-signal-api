@@ -1,8 +1,8 @@
 import { AuthenticationError } from 'apollo-server-errors';
 import pubsub from '../../pubsub';
-import me from '../../me';
+import me from '../../helpers/me';
 import List from '../../../models/list';
-import getAggBoard from '../../../resolvers/getAggBoard';
+import getAggBoard from '../../helpers/getAggBoard';
 import NewPosRules from '../../../validations/newPos';
 
 const updateListPos = async (_: any, { input }: any, ctx: any) => {

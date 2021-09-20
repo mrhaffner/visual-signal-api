@@ -1,9 +1,9 @@
 import Board from '../../../models/board';
 import { AuthenticationError } from 'apollo-server-errors';
-import me from '../../me';
+import me from '../../helpers/me';
 import pubsub from '../../pubsub';
 import Member from '../../../models/member';
-import getMyMemberLevel from '../../getMyMemberLevel';
+import getMyMemberLevel from '../../helpers/getMyMemberLevel';
 import Card from '../../../models/card';
 import List from '../../../models/list';
 

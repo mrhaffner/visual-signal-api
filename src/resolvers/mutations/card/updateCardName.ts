@@ -1,9 +1,9 @@
 import { AuthenticationError } from 'apollo-server-errors';
 import NewNameRules from '../../../validations/newName';
 import pubsub from '../../pubsub';
-import me from '../../me';
+import me from '../../helpers/me';
 import Card from '../../../models/card';
-import getAggBoard from '../../../resolvers/getAggBoard';
+import getAggBoard from '../../helpers/getAggBoard';
 
 const updateCardName = async (_: any, { input }: any, ctx: any) => {
   try {

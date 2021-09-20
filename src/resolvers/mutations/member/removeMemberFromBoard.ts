@@ -1,4 +1,4 @@
-import { AuthenticationError, UserInputError } from 'apollo-server-errors';
+import { AuthenticationError } from 'apollo-server-errors';
 import pubsub from '../../pubsub';
 import me from '../../me';
 import Member from '../../../models/member';

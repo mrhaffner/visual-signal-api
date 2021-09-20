@@ -12,6 +12,7 @@ import deleteCard from './card/deleteCard';
 import createMember from './member/createMember';
 import inviteMember from './member/inviteMember';
 import removeMemberFromBoard from './member/removeMemberFromBoard';
+import updateMemberLevelBoard from './member/updateMemberLevelBoard';
 
 const mutations = {
   createBoard,
@@ -28,6 +29,7 @@ const mutations = {
   createMember,
   inviteMember,
   removeMemberFromBoard,
+  updateMemberLevelBoard,
 };
 
 export default mutations;

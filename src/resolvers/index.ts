@@ -68,58 +68,6 @@ const resolvers = {
   },
   Mutation: {
     ...mutations,
-    updateMemberLevelBoard: async (_: any, { input }: any, ctx: any) => {
-      const { memberId, boardId, newMemberLevel } = input;
-
-      if (!ctx.currentMember) {
-        throw new AuthenticationError('Not authenticated');
-      }
-
-      const myMemberInfo = await me(ctx.currentMember._id);
-      //@ts-ignore
-      if (!myMemberInfo.idBoards.includes(boardId)) {
-        throw new AuthenticationError('Not authorized to view this content');
-      }
-
-      if (newMemberLevel !== 'admin' && newMemberLevel !== 'normal') {
-        throw new ValidationError('Invalid user level');
-      }
-
-      try {
-        const board = await Board.findById(boardId);
-
-        //@ts-ignore
-        const myMemberLevel = board.members.filter(
-          (memObj: any) =>
-            memObj.idMember.toString() === ctx.currentMember._id.toString(),
-        )[0].memberType;
-
-        //can only change if admin
-        if (myMemberLevel !== 'admin') {
-          throw new AuthenticationError('Not authorized');
-        }
-        //can only change an admin to normal if there is another admin === 2
-        //@ts-ignore
-        const adminCount = board.members.filter(
-          (obj: any) => obj.memberType === 'admin',
-        ).length;
-
-        if (adminCount === 1 && newMemberLevel === 'normal') {
-          throw new AuthenticationError('Not authorized');
-        }
-
-        await Board.findOneAndUpdate(
-          { _id: boardId, 'members.idMember': memberId },
-          { 'members.$.memberType': newMemberLevel },
-        );
-        const newBoard = await getBoardById(_, { _id: boardId }, ctx);
-        pubsub.publish('BOARD_UPDATED', { boardUpdated: newBoard });
-
-        return memberId;
-      } catch (e) {
-        console.log('error', e);
-      }
-    },
     updateMemberBoards: async (_: any, { input }: any) => {
       const { _id, boards } = input;
       //change to single board and handle updated array here

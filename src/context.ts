@@ -1,6 +1,6 @@
-import Member from './models/member';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
+import me from './resolvers/helpers/me';
 
 dotenv.config();
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -14,7 +14,7 @@ const context = async ({ req }: any) => {
     const decodedToken = jwt.verify(auth.substring(7), JWT_SECRET);
 
     //@ts-ignore
-    const currentMember = await Member.findById(decodedToken.id);
+    const currentMember = await me(decodedToken.id);
 
     return { currentMember };
     // } catch (e) {

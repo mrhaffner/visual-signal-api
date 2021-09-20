@@ -4,15 +4,17 @@ import { execute, subscribe } from 'graphql';
 import { ApolloServer } from 'apollo-server-express';
 import { SubscriptionServer } from 'subscriptions-transport-ws';
 import { makeExecutableSchema } from '@graphql-tools/schema';
-import mongoose, { connection } from 'mongoose';
+import mongoose from 'mongoose';
 import typeDefs from './gql';
 import resolvers from './resolvers';
 import context from './context';
 import onConnect from './onConnect';
+import mongoSanitize from 'express-mongo-sanitize';
 
 (async () => {
   const PORT = 8080;
   const app = express();
+  app.use(mongoSanitize());
   const httpServer = createServer(app);
 
   mongoose.connect('mongodb://localhost:27017/test', {

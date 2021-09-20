@@ -17,11 +17,11 @@ import getAggBoard from './getAggBoard';
 import pubsub from './pubsub';
 // import createBoard from './mutations/createBoard';
 import mutations from './mutations';
+import getMyMemberLevel from './getMyMemberLevel';
 
 dotenv.config();
 // const pubsub = new PubSub();
 const JWT_SECRET = process.env.JWT_SECRET;
-const { createBoard, updateBoardName } = mutations;
 
 const resolvers = {
   Query: {
@@ -67,50 +67,7 @@ const resolvers = {
     }, //may be used in the future, probably needs a version for admins and non admids or some sort of auth
   },
   Mutation: {
-    createBoard,
-    updateBoardName,
-    deleteBoard: async (_: any, { _id }: any, ctx: any) => {
-      if (!ctx.currentMember) {
-        throw new AuthenticationError('Not authenticated');
-      }
-
-      const myMemberInfo = await me(ctx.currentMember._id);
-      //@ts-ignore
-      if (!myMemberInfo.idBoards.includes(_id)) {
-        throw new AuthenticationError('Not authorized to view this content');
-      }
-      try {
-        ////
-        //only admin can delete board???
-        ////
-        const board = await Board.findById(_id);
-        // @ts-ignore comment
-        const boardMembers = board.members;
-
-        for await (const mem of boardMembers) {
-          const memberId = mem.idMember;
-          const member = await Member.findById(memberId);
-          // @ts-ignore comment
-          const memberBoards = member.idBoards;
-          const newBoards = memberBoards.filter(
-            (x: any) => x.toString() !== _id,
-          );
-          // @ts-ignore comment
-          member.idBoards = newBoards;
-          member.save();
-        }
-
-        await Board.findOneAndRemove({
-          _id,
-        });
-
-        pubsub.publish('BOARD_DELETED', { boardDeleted: _id });
-        return _id;
-      } catch (e) {
-        console.log(e);
-        return null;
-      }
-    },
+    ...mutations,
     createList: async (_: any, { input }: any, ctx: any) => {
       const { name, pos, idBoard } = input;
       if (!ctx.currentMember) {
@@ -385,11 +342,12 @@ const resolvers = {
         const board = await Board.findById(boardId);
 
         //ensure a normal user can only leave a board, not remove another user
+        const myMemberLevel = getMyMemberLevel(board, ctx.currentMember._id);
         //@ts-ignore
-        const myMemberLevel = board.members.filter(
-          (memObj: any) =>
-            memObj.idMember.toString() === ctx.currentMember._id.toString(),
-        )[0].memberType;
+        // const myMemberLevel = board.members.filter(
+        //   (memObj: any) =>
+        //     memObj.idMember.toString() === ctx.currentMember._id.toString(),
+        // )[0].memberType;
 
         if (
           myMemberLevel === 'normal' &&

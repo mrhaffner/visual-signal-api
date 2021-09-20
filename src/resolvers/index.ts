@@ -18,6 +18,7 @@ import pubsub from './pubsub';
 // import createBoard from './mutations/createBoard';
 import mutations from './mutations';
 import getMyMemberLevel from './getMyMemberLevel';
+import subscriptions from './subscriptions';
 
 dotenv.config();
 // const pubsub = new PubSub();
@@ -103,35 +104,7 @@ const resolvers = {
     }, //not currently used
   },
   Subscription: {
-    newBoard: {
-      subscribe: withFilter(
-        () => pubsub.asyncIterator('NEW_BOARD'),
-        (payload, variables, ctx) => {
-          return (
-            ctx.currentMember._id.toString() ===
-            payload.newBoard.memberId.toString()
-          );
-        },
-      ),
-    },
-    boardUpdated: {
-      subscribe: withFilter(
-        () => pubsub.asyncIterator('BOARD_UPDATED'),
-        async (payload, _, ctx) => {
-          try {
-            const boards = await getMyBoards(null, null, ctx);
-
-            for (const x of boards) {
-              if (x._id.toString() === payload.boardUpdated[0]._id.toString())
-                return true;
-            }
-            return false;
-          } catch (e) {
-            console.log(e);
-          }
-        },
-      ),
-    },
+    ...subscriptions,
     boardDeleted: {
       subscribe: withFilter(
         () => pubsub.asyncIterator('BOARD_DELETED'),

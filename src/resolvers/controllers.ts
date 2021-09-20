@@ -1,8 +1,7 @@
-import Board from '../models/board';
-import Member from '../models/member';
 import me from './me';
 import { AuthenticationError } from 'apollo-server-errors';
 import getAggBoard from './getAggBoard';
+import getMyBoardsHelper from './getMyBoardsHelper';
 
 export const getBoardById = async (_: any, { _id }: any, ctx: any) => {
   if (!ctx.currentMember) {
@@ -23,8 +22,5 @@ export const getMyBoards = async (_: any, __: any, { currentMember }: any) => {
   if (!currentMember) {
     throw new AuthenticationError('Not authenticated');
   }
-  const member = await Member.findOne({ _id: currentMember._id });
-  // @ts-ignore comment
-  const ids = member.idBoards;
-  return await Board.find({ _id: { $in: ids } });
+  return await getMyBoardsHelper(currentMember._id);
 };

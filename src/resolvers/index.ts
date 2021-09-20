@@ -14,9 +14,12 @@ import bcrypt from 'bcrypt';
 import dotenv from 'dotenv';
 import me from './me';
 import getAggBoard from './getAggBoard';
+import { body, validationResult } from 'express-validator';
+import pubsub from './pubsub';
+import createBoard from './mutations/createBoard';
 
 dotenv.config();
-const pubsub = new PubSub();
+// const pubsub = new PubSub();
 const JWT_SECRET = process.env.JWT_SECRET;
 
 const resolvers = {
@@ -63,42 +66,7 @@ const resolvers = {
     }, //may be used in the future, probably needs a version for admins and non admids or some sort of auth
   },
   Mutation: {
-    createBoard: async (_: any, { name }: any, ctx: any) => {
-      if (!ctx.currentMember) {
-        throw new AuthenticationError('Not authenticated');
-      } ////work here
-      const idMemberCreator = ctx.currentMember._id;
-      //create new doc then save?
-      const members = [
-        {
-          idMember: idMemberCreator,
-          memberType: 'admin',
-          fullName: ctx.currentMember.fullName,
-          username: ctx.currentMember.username,
-          initials: ctx.currentMember.initials,
-        },
-      ];
-
-      const board = await Board.create({
-        name,
-        idMemberCreator,
-        members,
-      });
-
-      const member = await Member.findById(idMemberCreator);
-      // @ts-ignore comment
-      member.idBoards.push(board._id);
-      await member.save();
-
-      const newBoardObj = {
-        memberId: idMemberCreator,
-        boardObj: { name, _id: board._id },
-      };
-
-      pubsub.publish('NEW_BOARD', { newBoard: newBoardObj });
-
-      return board;
-    },
+    createBoard,
     updateBoardName: async (_: any, { input }: any, ctx: any) => {
       const { _id, name } = input;
       if (!ctx.currentMember) {

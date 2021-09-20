@@ -1,11 +1,11 @@
-import Board from '../../models/board';
+import Board from '../../../models/board';
 import { AuthenticationError } from 'apollo-server-errors';
-import me from '../me';
-import pubsub from '../pubsub';
-import Member from '../../models/member';
-import getMyMemberLevel from '../getMyMemberLevel';
-import Card from '../../models/card';
-import List from '../../models/list';
+import me from '../../me';
+import pubsub from '../../pubsub';
+import Member from '../../../models/member';
+import getMyMemberLevel from '../../getMyMemberLevel';
+import Card from '../../../models/card';
+import List from '../../../models/list';
 
 const deleteBoard = async (_: any, { _id }: any, ctx: any) => {
   try {

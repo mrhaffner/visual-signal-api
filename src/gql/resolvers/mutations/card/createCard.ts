@@ -1,36 +1,33 @@
 import { AuthenticationError } from 'apollo-server-errors';
-import NewListRules from '../../../validations/list';
+import NewCardRules from '../../validations/card';
 import pubsub from '../../pubsub';
 import me from '../../helpers/me';
-import List from '../../../models/list';
+import Card from '../../../../models/card';
 import getAggBoard from '../../helpers/getAggBoard';
 
-const createList = async (_: any, { input }: any, ctx: any) => {
+const createCard = async (_: any, { input }: any, ctx: any) => {
   try {
+    await NewCardRules.validateAsync(input);
     if (!ctx.currentMember) {
       throw new AuthenticationError('Not authenticated');
     }
 
     const myMemberInfo = await me(ctx.currentMember._id);
-    await NewListRules.validateAsync(input);
-
-    const { name, pos, idBoard } = input;
+    const { name, pos, idList, idBoard } = input;
 
     //@ts-ignore
     if (!myMemberInfo.idBoards.includes(idBoard)) {
       throw new AuthenticationError('Not authorized to view this content');
     }
-
-    const list = await List.create({ name, pos, idBoard });
+    const card = await Card.create({ name, pos, idList, idBoard });
 
     const board = await getAggBoard(idBoard);
-
     pubsub.publish('BOARD_UPDATED', { boardUpdated: board });
 
-    return list;
+    return card;
   } catch (e) {
     console.log(e);
   }
 };
 
-export default createList;
+export default createCard;

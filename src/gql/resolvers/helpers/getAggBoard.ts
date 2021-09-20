@@ -1,4 +1,4 @@
-import Board from '../../models/board';
+import Board from '../../../models/board';
 import mongoose from 'mongoose';
 
 const getAggBoard = async (_id: string) => {

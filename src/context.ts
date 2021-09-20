@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
-import me from './resolvers/helpers/me';
+import me from './gql/resolvers/helpers/me';
 
 dotenv.config();
 const JWT_SECRET = process.env.JWT_SECRET;

@@ -1,4 +1,4 @@
-import Member from '../../models/member';
+import Member from '../../../models/member';
 
 export const updateMemberBoards = async (_: any, { input }: any) => {
   const { _id, boards } = input;

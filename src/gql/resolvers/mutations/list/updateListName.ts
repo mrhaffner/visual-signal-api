@@ -1,11 +1,11 @@
 import { AuthenticationError } from 'apollo-server-errors';
-import NewPosRules from '../../../validations/newPos';
+import NewNameRules from '../../validations/newName';
 import pubsub from '../../pubsub';
 import me from '../../helpers/me';
-import Card from '../../../models/card';
+import List from '../../../../models/list';
 import getAggBoard from '../../helpers/getAggBoard';
 
-const updateCardPos = async (_: any, { input }: any, ctx: any) => {
+const updateListName = async (_: any, { input }: any, ctx: any) => {
   try {
     if (!ctx.currentMember) {
       throw new AuthenticationError('Not authenticated');
@@ -13,34 +13,29 @@ const updateCardPos = async (_: any, { input }: any, ctx: any) => {
 
     const myMemberInfo = await me(ctx.currentMember._id);
 
-    const { _id, pos, idList, idBoard } = input;
-
-    await NewPosRules.validateAsync({ pos });
+    const { _id, name, idBoard } = input;
+    await NewNameRules.validateAsync({ name });
     //@ts-ignore
     if (!myMemberInfo.idBoards.includes(idBoard)) {
       throw new AuthenticationError('Not authorized to view this content');
     }
 
-    const updateObject = { pos };
-    // @ts-ignore comment
-    if (idList) updateObject.idList = idList;
-    const card = await Card.findOneAndUpdate(
-      {
-        _id,
-      },
-      updateObject,
+    const list = await List.findOneAndUpdate(
+      { _id },
+      { name },
       {
         new: true,
       },
     );
 
     const board = await getAggBoard(idBoard);
+
     pubsub.publish('BOARD_UPDATED', { boardUpdated: board });
 
-    return card;
+    return list;
   } catch (e) {
     console.log(e);
   }
 };
 
-export default updateCardPos;
+export default updateListName;

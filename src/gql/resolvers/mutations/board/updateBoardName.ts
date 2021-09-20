@@ -1,9 +1,9 @@
-import Board from '../../../models/board';
+import Board from '../../../../models/board';
 import { AuthenticationError } from 'apollo-server-errors';
 import me from '../../helpers/me';
 import pubsub from '../../pubsub';
 import getAggBoard from '../../helpers/getAggBoard';
-import NewNameRules from '../../../validations/newName';
+import NewNameRules from '../../validations/newName';
 
 const updateBoardName = async (_: any, { input }: any, ctx: any) => {
   try {

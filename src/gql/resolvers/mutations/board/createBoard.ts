@@ -1,7 +1,7 @@
 import { AuthenticationError } from 'apollo-server-errors';
-import NewNameRules from '../../../validations/newName';
-import Board from '../../../models/board';
-import Member from '../../../models/member';
+import NewNameRules from '../../validations/newName';
+import Board from '../../../../models/board';
+import Member from '../../../../models/member';
 import pubsub from '../../pubsub';
 
 const createBoard = async (_: any, { name }: any, ctx: any) => {

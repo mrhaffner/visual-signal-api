@@ -1,8 +1,8 @@
 import { AuthenticationError } from 'apollo-server-errors';
 import pubsub from '../../pubsub';
 import me from '../../helpers/me';
-import Member from '../../../models/member';
-import Board from '../../../models/board';
+import Member from '../../../../models/member';
+import Board from '../../../../models/board';
 import getAggBoard from '../../helpers/getAggBoard';
 import getMyMemberLevel from '../../helpers/getMyMemberLevel';
 

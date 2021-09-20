@@ -1,11 +1,10 @@
 import { AuthenticationError } from 'apollo-server-errors';
 import pubsub from '../../pubsub';
 import me from '../../helpers/me';
-import List from '../../../models/list';
+import Card from '../../../../models/card';
 import getAggBoard from '../../helpers/getAggBoard';
-import NewPosRules from '../../../validations/newPos';
 
-const updateListPos = async (_: any, { input }: any, ctx: any) => {
+const deleteCard = async (_: any, { input }: any, ctx: any) => {
   try {
     if (!ctx.currentMember) {
       throw new AuthenticationError('Not authenticated');
@@ -13,28 +12,23 @@ const updateListPos = async (_: any, { input }: any, ctx: any) => {
 
     const myMemberInfo = await me(ctx.currentMember._id);
 
-    const { _id, pos, idBoard } = input;
-    await NewPosRules.validateAsync({ pos });
+    const { _id, idBoard } = input;
 
     //@ts-ignore
     if (!myMemberInfo.idBoards.includes(idBoard)) {
       throw new AuthenticationError('Not authorized to view this content');
     }
-    const list = await List.findOneAndUpdate(
-      { _id },
-      { pos },
-      {
-        new: true,
-      },
-    );
+    await Card.findOneAndRemove({
+      _id,
+    });
 
     const board = await getAggBoard(idBoard);
     pubsub.publish('BOARD_UPDATED', { boardUpdated: board });
 
-    return list;
+    return _id;
   } catch (e) {
     console.log(e);
   }
 };
 
-export default updateListPos;
+export default deleteCard;

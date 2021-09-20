@@ -1,7 +1,7 @@
-import List from '../../models/list';
-import Card from '../../models/card';
-import Board from '../../models/board';
-import Member from '../../models/member';
+import List from '../../../models/list';
+import Card from '../../../models/card';
+import Board from '../../../models/board';
+import Member from '../../../models/member';
 
 export const allBoards = async () => {
   return await Board.find();

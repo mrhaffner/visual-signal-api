@@ -1,8 +1,8 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
-import Member from '../../../models/member';
+import Member from '../../../../models/member';
 import dotenv from 'dotenv';
-import NewMemberRules from '../../../validations/member';
+import NewMemberRules from '../../validations/member';
 dotenv.config();
 const JWT_SECRET = process.env.JWT_SECRET;
 

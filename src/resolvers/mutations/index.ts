@@ -9,6 +9,7 @@ import createCard from './card/createCard';
 import updateCardName from './card/updateCardName';
 import updateCardPos from './card/updateCardPos';
 import deleteCard from './card/deleteCard';
+import createMember from './member/createMember';
 
 const mutations = {
   createBoard,
@@ -22,6 +23,7 @@ const mutations = {
   updateCardName,
   updateCardPos,
   deleteCard,
+  createMember,
 };
 
 export default mutations;

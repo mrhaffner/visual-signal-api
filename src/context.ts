@@ -15,6 +15,7 @@ const context = async ({ req }: any) => {
 
     //@ts-ignore
     const currentMember = await Member.findById(decodedToken.id);
+
     return { currentMember };
     // } catch (e) {
     //   console.log(e);

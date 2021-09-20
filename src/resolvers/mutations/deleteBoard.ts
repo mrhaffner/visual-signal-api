@@ -4,6 +4,8 @@ import me from '../me';
 import pubsub from '../pubsub';
 import Member from '../../models/member';
 import getMyMemberLevel from '../getMyMemberLevel';
+import Card from '../../models/card';
+import List from '../../models/list';
 
 const deleteBoard = async (_: any, { _id }: any, ctx: any) => {
   try {
@@ -38,11 +40,8 @@ const deleteBoard = async (_: any, { _id }: any, ctx: any) => {
       member.save();
     }
 
-    ///
-    ///////
-    ////delete all cards and lists!!!!!/////
-    ////////
-    ////
+    await Card.deleteMany({ idBoard: _id });
+    await List.deleteMany({ idBoard: _id });
 
     await Board.findOneAndRemove({
       _id,

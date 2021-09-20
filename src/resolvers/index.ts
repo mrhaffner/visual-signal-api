@@ -70,18 +70,22 @@ const resolvers = {
     ...mutations,
     createList: async (_: any, { input }: any, ctx: any) => {
       const { name, pos, idBoard } = input;
+
       if (!ctx.currentMember) {
         throw new AuthenticationError('Not authenticated');
       }
 
       const myMemberInfo = await me(ctx.currentMember._id);
+
       //@ts-ignore
       if (!myMemberInfo.idBoards.includes(idBoard)) {
         throw new AuthenticationError('Not authorized to view this content');
       }
+
       const list = await List.create({ name, pos, idBoard });
 
       const board = await getBoardById(_, { _id: idBoard }, ctx);
+
       pubsub.publish('BOARD_UPDATED', { boardUpdated: board });
 
       return list;
@@ -531,6 +535,7 @@ const resolvers = {
         async (payload, _, ctx) => {
           try {
             const boards = await getMyBoards(null, null, ctx);
+
             for (const x of boards) {
               if (x._id.toString() === payload.boardUpdated[0]._id.toString())
                 return true;

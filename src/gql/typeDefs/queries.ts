@@ -11,6 +11,7 @@ const queryTypeDefs = gql`
     getMyMemberInfo: Member
     getMemberByEmail(email: String!): Member
     getAllMembers: [Member]
+    validateEmail(email: String!): Boolean
   }
 `;
 

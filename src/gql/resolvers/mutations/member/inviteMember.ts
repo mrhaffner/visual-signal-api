@@ -20,6 +20,9 @@ const inviteMember = async (_: any, { input }: any, ctx: any) => {
       throw new AuthenticationError('Not authorized to view this content');
     }
     const member = await Member.findOne({ email });
+    if (!member) {
+      throw new UserInputError('Member does not exist');
+    }
     //@ts-ignore
     if (member.idBoards.includes(boardId)) {
       throw new UserInputError('Member already belongs to this board!');

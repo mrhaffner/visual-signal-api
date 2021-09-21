@@ -9,6 +9,7 @@ import typeDefs from './gql/typeDefs';
 import resolvers from './gql/resolvers';
 import context from './context';
 import onConnect from './onConnect';
+// import onOperation from './onOperation';
 import mongoSanitize from 'express-mongo-sanitize';
 
 (async () => {
@@ -44,10 +45,11 @@ import mongoSanitize from 'express-mongo-sanitize';
       execute,
       subscribe,
       onConnect,
+      // onOperation,
       // onOperation: (message: any, params: any, webSocket: any) => {
-      //   console.log(message);
-      //   console.log(params.authToken);
-      //   console.log(webSocket.upgradeReq.headers);
+      //   // console.log(message);
+      //   // console.log(params);
+      //   console.log(webSocket.upgradeReq);
 
       //   return { ...params, context: { user: 'me' } };
       // },

@@ -6,8 +6,8 @@ dotenv.config();
 const JWT_SECRET = process.env.JWT_SECRET;
 
 const onConnect = async (params: any, webSocket: any) => {
-  if (params.authorization) {
-    try {
+  try {
+    if (params.authorization) {
       const decodedToken = jwt.verify(
         params.authorization.substring(7),
         JWT_SECRET,
@@ -16,9 +16,9 @@ const onConnect = async (params: any, webSocket: any) => {
       const currentMember = await Member.findById(decodedToken.id);
 
       return { currentMember };
-    } catch (e) {
-      console.log(e);
     }
+  } catch (e) {
+    console.log(e);
   }
 };
 

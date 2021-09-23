@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import me from './gql/resolvers/helpers/me';
+import { AuthenticationError } from 'apollo-server-errors';
 
 dotenv.config();
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -11,12 +12,22 @@ const context = async ({ req }: any) => {
 
   if (auth && auth.toLowerCase().startsWith('bearer ')) {
     // try {
-    const decodedToken = jwt.verify(auth.substring(7), JWT_SECRET);
+    try {
+      const decodedToken = jwt.verify(auth.substring(7), JWT_SECRET);
+      //@ts-ignore
+      const currentMember = await me(decodedToken.id);
 
-    //@ts-ignore
-    const currentMember = await me(decodedToken.id);
+      return { currentMember };
+    } catch (e) {
+      console.log(e);
+      throw new AuthenticationError('Invalid token');
+      //throwing error leads to unhandled rejection, how to handle?
 
-    return { currentMember };
+      // return null;
+      // returning null leads to type error (ie cannot read property, could check if data is null and use that to redirect (history.push board/.....))
+      //also happens without returning null but with the try catch block
+    }
+
     // } catch (e) {
     //   console.log(e);
     // }

@@ -6,6 +6,8 @@ import pubsub from '../../pubsub';
 
 const createBoard = async (_: any, { name }: any, ctx: any) => {
   try {
+    console.log('hi');
+
     if (!ctx.currentMember) {
       throw new AuthenticationError('Not authenticated');
     }

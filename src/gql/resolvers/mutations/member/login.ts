@@ -16,6 +16,7 @@ const login = async (_: any, { input }: any) => {
     if (!member || !validPassword) {
       throw new UserInputError('wrong credentials');
     }
+
     const memberForToken = {
       id: member._id,
       //@ts-ignore

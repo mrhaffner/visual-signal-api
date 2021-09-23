@@ -1,3 +1,4 @@
+import { AuthenticationError } from 'apollo-server-errors';
 import { withFilter } from 'graphql-subscriptions';
 import pubsub from '../pubsub';
 

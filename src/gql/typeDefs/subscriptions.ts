@@ -21,6 +21,7 @@ const subscriptionTypeDefs = gql`
   type BoardListObject {
     _id: ID!
     name: String!
+    color: BoardColor
   }
 `;
 

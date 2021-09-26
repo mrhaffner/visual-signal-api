@@ -52,7 +52,11 @@ const inviteMember = async (_: any, { input }: any, ctx: any) => {
 
     const newBoardObj = {
       memberId: member._id,
-      boardObj: { name: newBoard[0].name, _id: newBoard[0]._id },
+      boardObj: {
+        name: newBoard[0].name,
+        _id: newBoard[0]._id,
+        color: newBoard[0].color,
+      },
     };
 
     pubsub.publish('NEW_BOARD', { newBoard: newBoardObj });

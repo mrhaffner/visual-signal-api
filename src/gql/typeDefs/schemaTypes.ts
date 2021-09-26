@@ -7,6 +7,18 @@ const schemaTypes = gql`
     owner
   }
 
+  enum BoardColor {
+    blue
+    orange
+    green
+    red
+    purple
+    pink
+    lime
+    sky
+    grey
+  }
+
   type MemberInfo {
     idMember: ID!
     memberType: MemberType!
@@ -21,6 +33,7 @@ const schemaTypes = gql`
     lists: [List]
     idMemberCreator: String!
     members: [MemberInfo]
+    color: BoardColor
   }
 
   type List {

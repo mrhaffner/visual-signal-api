@@ -1,5 +1,17 @@
 import { model, Schema } from 'mongoose';
 
+const colorEnum = [
+  'blue',
+  'orange',
+  'green',
+  'red',
+  'purple',
+  'pink',
+  'lime',
+  'sky',
+  'grey',
+];
+
 const memberInfo = new Schema({
   idMember: {
     type: Schema.Types.ObjectId,
@@ -26,6 +38,7 @@ const boardSchema = new Schema({
     required: true,
   },
   members: [memberInfo],
+  color: { type: String, enum: colorEnum, default: 'grey' },
 });
 
 //when board is created, memberInfo for owner is automatically added to array

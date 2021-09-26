@@ -16,6 +16,7 @@ export const getBoardById = async (_: any, { _id }: any, ctx: any) => {
     }
 
     const board = await getAggBoard(_id);
+
     return board;
   } catch (e) {
     console.log(e);

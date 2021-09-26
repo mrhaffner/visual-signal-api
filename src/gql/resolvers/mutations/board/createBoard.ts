@@ -1,18 +1,16 @@
 import { AuthenticationError } from 'apollo-server-errors';
-import NewNameRules from '../../validations/newName';
 import Board from '../../../../models/board';
 import Member from '../../../../models/member';
 import pubsub from '../../pubsub';
+import NewBoardRules from '../../validations/newBoard';
 
-const createBoard = async (_: any, { name }: any, ctx: any) => {
+const createBoard = async (_: any, { input }: any, ctx: any) => {
   try {
-    console.log('hi');
-
     if (!ctx.currentMember) {
       throw new AuthenticationError('Not authenticated');
     }
 
-    await NewNameRules.validateAsync({ name });
+    await NewBoardRules.validateAsync(input);
 
     const idMemberCreator = ctx.currentMember._id;
     const members = [
@@ -26,9 +24,9 @@ const createBoard = async (_: any, { name }: any, ctx: any) => {
     ];
 
     const board = await Board.create({
-      name,
       idMemberCreator,
       members,
+      ...input,
     });
 
     const member = await Member.findById(idMemberCreator);
@@ -38,7 +36,7 @@ const createBoard = async (_: any, { name }: any, ctx: any) => {
 
     const newBoardObj = {
       memberId: idMemberCreator,
-      boardObj: { name, _id: board._id },
+      boardObj: { ...input, _id: board._id },
     };
 
     pubsub.publish('NEW_BOARD', { newBoard: newBoardObj });

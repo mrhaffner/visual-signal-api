@@ -15,12 +15,11 @@ https://github.com/mrhaffner/visual-signal
 - Sharing boards between users
 - Real time updates with websockets
 
-## Main technologies and libraries used:
+## Built with:
 * Node / Express
 * Typescript
 * MongoDB / Mongoose
 * Apollo Server / GraphQL
-* Websockets for real time updates across users
 * JSON Web Token / BCrypt
 
 ## Acknowledgements:

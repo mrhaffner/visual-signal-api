@@ -10,17 +10,27 @@ https://user-images.githubusercontent.com/70085763/134999327-f4890607-6c4c-419e-
 
 https://github.com/mrhaffner/visual-signal
 
+## Purpose
+
+- Learn about Agile development
+- Understand how full stack, scalable web application are built
+- Gain experience with Typescript / React / Node
+- Explore document based storage (MongoDB)
+- Gain experience implementing authorization / authentication
+
 ## Features
+
 - User creation / authentication / authorization
 - Sharing boards between users
 - Real time updates with websockets
 
 ## Built with
-* Node / Express
-* Typescript
-* MongoDB / Mongoose
-* Apollo Server / GraphQL
-* JSON Web Token / BCrypt
+
+- Node / Express
+- Typescript
+- MongoDB / Mongoose
+- Apollo Server / GraphQL
+- JSON Web Token / BCrypt
 
 ## Acknowledgements
 
